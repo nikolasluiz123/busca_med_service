@@ -1,0 +1,15 @@
+Extraia as informações da prescrição médica a partir do texto fornecido.
+Siga estritamente a estrutura JSON abaixo:
+{
+  "medicamentos": [
+    {
+      "nome": "Nome do medicamento",
+      "dosagem": "Dosagem",
+      "frequencia": "Frequência de uso",
+      "duracao": "Duração do tratamento"
+    }
+  ]
+}
+Regras:
+1. Caso o texto mencione múltiplos medicamentos, crie novos objetos na lista.
+2. Extraia apenas o que está explicitamente escrito. Se uma informação (como duração ou frequência) não for informada no texto, retorne null.

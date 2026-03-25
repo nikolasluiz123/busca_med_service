@@ -1,0 +1,10 @@
+Extraia as informações do texto impresso no verso da cartela de comprimidos (blister) presente na imagem.
+Siga estritamente a estrutura JSON abaixo:
+{
+  "principio_ativo": "Nome do princípio ativo",
+  "dosagem": "Dosagem",
+  "data_validade": "Data de validade impressa"
+}
+Regras:
+1. A data de validade é a informação mais crítica. Busque por padrões visuais próximos a "Val", "V", "Exp" ou datas (ex: 10/25, OUT 2026).
+2. Se a tinta estiver apagada, refletindo luz, ou se o dado não constar na imagem, retorne null no campo correspondente. Não invente informações.

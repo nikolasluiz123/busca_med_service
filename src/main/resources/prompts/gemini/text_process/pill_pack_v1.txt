@@ -1,0 +1,10 @@
+Extraia as informações da cartela de comprimidos a partir do texto fornecido.
+Siga estritamente a estrutura JSON abaixo:
+{
+  "principio_ativo": "Nome do princípio ativo",
+  "dosagem": "Dosagem",
+  "data_validade": "Data de validade"
+}
+Regras:
+1. O texto contém a transcrição do verso de um medicamento. A data de validade é o foco principal.
+2. Se qualquer um dos dados solicitados não estiver claramente descrito no texto, defina o valor do campo como null. Não faça suposições.

@@ -1,0 +1,15 @@
+Extraia as informações da prescrição médica presente na imagem.
+Siga estritamente a estrutura JSON abaixo:
+{
+  "medicamentos": [
+    {
+      "nome": "Nome do medicamento",
+      "dosagem": "Dosagem",
+      "frequencia": "Frequência de uso",
+      "duracao": "Duração do tratamento"
+    }
+  ]
+}
+Regras:
+1. Caso a imagem contenha múltiplos medicamentos, adicione novos objetos à lista.
+2. Se qualquer informação estiver ilegível, cortada ou ausente, defina o valor do campo como null. Não invente informações.
