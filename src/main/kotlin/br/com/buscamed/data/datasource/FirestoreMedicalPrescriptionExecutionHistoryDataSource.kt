@@ -3,6 +3,7 @@ package br.com.buscamed.data.datasource
 import br.com.buscamed.data.datasource.core.BaseFirestoreDataSource
 import br.com.buscamed.data.datasource.core.FirestoreSchema.EXECUTION_HISTORY_COLLECTION
 import br.com.buscamed.data.datasource.core.FirestoreSchema.MEDICAL_PRESCRIPTION_COLLECTION
+import br.com.buscamed.data.datasource.core.FirestoreSchema.RECORDS_COLLECTION
 import br.com.buscamed.data.datasource.core.documentOrNew
 import br.com.buscamed.data.datasource.interfaces.LLMExecutionHistoryDataSource
 import br.com.buscamed.data.document.LLMExecutionHistoryDocument
@@ -11,8 +12,9 @@ import br.com.buscamed.data.document.LLMExecutionHistoryDocument
 class FirestoreMedicalPrescriptionExecutionHistoryDataSource : BaseFirestoreDataSource(), LLMExecutionHistoryDataSource {
 
     override suspend fun save(history: LLMExecutionHistoryDocument): String {
-        val documentReference = db.document(EXECUTION_HISTORY_COLLECTION)
-            .collection(MEDICAL_PRESCRIPTION_COLLECTION)
+        val documentReference = db.collection(EXECUTION_HISTORY_COLLECTION)
+            .document(MEDICAL_PRESCRIPTION_COLLECTION)
+            .collection(RECORDS_COLLECTION)
             .documentOrNew(history.id)
 
         documentReference
@@ -23,8 +25,9 @@ class FirestoreMedicalPrescriptionExecutionHistoryDataSource : BaseFirestoreData
     }
 
     override suspend fun updateImageStoragePath(historyId: String, path: String) {
-        db.document(EXECUTION_HISTORY_COLLECTION)
-            .collection(MEDICAL_PRESCRIPTION_COLLECTION)
+        db.collection(EXECUTION_HISTORY_COLLECTION)
+            .document(MEDICAL_PRESCRIPTION_COLLECTION)
+            .collection(RECORDS_COLLECTION)
             .document(historyId)
             .update(LLMExecutionHistoryDocument::storageImagePath.name, path)
             .get()

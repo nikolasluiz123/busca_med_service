@@ -14,7 +14,7 @@ fun Route.prescriptionRoutes() {
     val controller: PrescriptionController by inject()
 
     route(PrescriptionRoutes.V1_ROOT) {
-        authenticate(AuthConstants.AUTH_GOOGLE_OIDC_NAME) {
+        authenticate(AuthConstants.AUTH_FIREBASE_NAME) {
             post(PrescriptionRoutes.PROCESS_IMAGE) {
                 controller.processImage(call)
             }

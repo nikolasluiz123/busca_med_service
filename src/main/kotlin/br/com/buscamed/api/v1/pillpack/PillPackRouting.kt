@@ -12,7 +12,7 @@ fun Route.pillPackRoutes() {
     val controller: PillPackController by inject()
 
     route(PillPackRoutes.V1_ROOT) {
-        authenticate(AuthConstants.AUTH_GOOGLE_OIDC_NAME) {
+        authenticate(AuthConstants.AUTH_FIREBASE_NAME) {
             post(PillPackRoutes.PROCESS_IMAGE) {
                 controller.processImage(call)
             }
