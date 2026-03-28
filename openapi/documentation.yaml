@@ -1,0 +1,269 @@
+openapi: 3.0.3
+info:
+  title: BuscaMed API
+  description: |
+    API do sistema BuscaMed para processamento de prescrições médicas e cartelas de comprimidos utilizando LLM (Google Gemini), além da sincronização de dados de medicamentos da ANVISA.
+  version: 0.1.0
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor Local
+
+# Documentação padrão de segurança requerida pelo Ktor Auth
+security:
+  - bearerAuth: []
+
+paths:
+  /v1/prescription/process-image:
+    post:
+      summary: Processa a imagem de uma prescrição médica
+      description: Recebe o arquivo de imagem de uma receita médica e extrai os dados estruturados dos medicamentos receitados (nome, dosagem, frequência e duração).
+      tags:
+        - Prescription
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+                - mimeType
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Arquivo da imagem da prescrição médica.
+                mimeType:
+                  type: string
+                  description: Tipo MIME da imagem (ex. image/jpeg, image/png).
+                  example: "image/jpeg"
+      responses:
+        '200':
+          description: Processamento realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptionResponse'
+        '400':
+          description: Requisição inválida ou imagem não fornecida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '502':
+          description: Falha na integração com o Google Gemini
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+
+  /v1/prescription/process-text:
+    post:
+      summary: Processa o texto de uma prescrição médica
+      description: Recebe o texto contendo uma prescrição médica e extrai os dados estruturados dos medicamentos receitados.
+      tags:
+        - Prescription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TextRequestDTO'
+      responses:
+        '200':
+          description: Processamento realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptionResponse'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /v1/pillpack/process-image:
+    post:
+      summary: Processa a imagem de uma cartela de comprimidos
+      description: Recebe o arquivo de imagem do verso de uma cartela (blister) e extrai o princípio ativo, dosagem e data de validade.
+      tags:
+        - Pill Pack
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+                - mimeType
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Arquivo da imagem da cartela de medicamentos.
+                mimeType:
+                  type: string
+                  description: Tipo MIME da imagem (ex. image/jpeg, image/png).
+                  example: "image/jpeg"
+      responses:
+        '200':
+          description: Processamento realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PillPackResponse'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /v1/pillpack/process-text:
+    post:
+      summary: Processa o texto de uma cartela de comprimidos
+      description: Recebe a transcrição de texto do verso de uma cartela de comprimidos e estrutura os dados.
+      tags:
+        - Pill Pack
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TextRequestDTO'
+      responses:
+        '200':
+          description: Processamento realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PillPackResponse'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /v1/anvisa/import:
+    post:
+      summary: Dispara a sincronização de medicamentos da ANVISA
+      description: Inicia o download, processamento do CSV da ANVISA e atualização (upsert) dos dados no banco Firestore.
+      tags:
+        - Anvisa
+      responses:
+        '202':
+          description: Processamento assíncrono aceito e iniciado
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '502':
+          description: Erro na integração com o portal de dados abertos da ANVISA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Insira o token JWT retornado pelo Google Identity / OIDC. 
+        Exemplo: `Bearer eyJhbGciOiJSUzI1...`
+
+  responses:
+    UnauthorizedError:
+      description: Falha de autenticação (Token ausente ou inválido)
+
+  schemas:
+    TextRequestDTO:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          description: O texto extraído ou digitado que será processado pela LLM.
+          example: "Tomar 1 comprimido de Dipirona 500mg de 8 em 8 horas durante 5 dias."
+
+    ErrorResponseDTO:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: Código interno do erro.
+          example: "BUSINESS_RULE_ERROR"
+        message:
+          type: string
+          description: Mensagem descritiva e amigável para o usuário.
+          example: "É obrigatório informar uma imagem para processamento"
+        timestamp:
+          type: string
+          format: date-time
+          description: Momento exato em que o erro ocorreu.
+          example: "2026-03-27T10:15:30Z"
+        path:
+          type: string
+          description: Caminho do endpoint que gerou o erro.
+          example: "/v1/prescription/process-image"
+        traceId:
+          type: string
+          nullable: true
+          description: ID de rastreamento no Google Cloud Trace.
+          example: "105445aa7843bc8bf206b12000100000"
+
+    PrescriptionResponse:
+      type: object
+      description: Estrutura retornada pelo Gemini baseada no prompt de prescrição médica.
+      properties:
+        medicamentos:
+          type: array
+          items:
+            type: object
+            properties:
+              nome:
+                type: string
+                nullable: true
+                example: "Amoxicilina"
+              dosagem:
+                type: string
+                nullable: true
+                example: "500mg"
+              frequencia:
+                type: string
+                nullable: true
+                example: "De 8 em 8 horas"
+              duracao:
+                type: string
+                nullable: true
+                example: "7 dias"
+
+    PillPackResponse:
+      type: object
+      description: Estrutura retornada pelo Gemini baseada no prompt de cartela de medicamentos.
+      properties:
+        principio_ativo:
+          type: string
+          nullable: true
+          example: "Paracetamol"
+        dosagem:
+          type: string
+          nullable: true
+          example: "750mg"
+        data_validade:
+          type: string
+          nullable: true
+          example: "10/25"

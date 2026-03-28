@@ -6,6 +6,9 @@ import com.google.cloud.firestore.FirestoreOptions
 abstract class BaseFirestoreDataSource {
 
     protected val db: Firestore by lazy {
-        FirestoreOptions.getDefaultInstance().service
+        FirestoreOptions.newBuilder()
+            .setDatabaseId("dev-db")
+            .build()
+            .service
     }
 }

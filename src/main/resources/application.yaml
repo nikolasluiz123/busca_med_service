@@ -1,7 +1,7 @@
 ktor:
   application:
     modules:
-      - br.com.ApplicationKt.module
+      - br.com.buscamed.ApplicationKt.module
   deployment:
     port: 8080
 
@@ -9,4 +9,4 @@ buscamed:
   gcp:
     project_id: ${GCP_PROJECT_ID}
     service_audience: ${GCP_SERVICE_AUDIENCE}
-    region: ${GCP_REGION}
+    region: "global"

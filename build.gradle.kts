@@ -46,4 +46,6 @@ dependencies {
     implementation("com.auth0:jwks-rsa:0.23.0")
     implementation("io.insert-koin:koin-ktor:4.1.1")
     implementation("io.insert-koin:koin-logger-slf4j:4.1.1")
+
+    implementation("org.apache.commons:commons-csv:1.14.1")
 }

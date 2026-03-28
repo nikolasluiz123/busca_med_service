@@ -1,5 +1,6 @@
 package br.com.buscamed.core.config
 
+import br.com.buscamed.api.v1.anvisa.anvisaRoutes
 import br.com.buscamed.api.v1.pillpack.pillPackRoutes
 import br.com.buscamed.api.v1.prescription.prescriptionRoutes
 import io.ktor.server.application.*
@@ -19,5 +20,6 @@ fun Application.configureRouting() {
 
         prescriptionRoutes()
         pillPackRoutes()
+        anvisaRoutes()
     }
 }

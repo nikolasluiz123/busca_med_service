@@ -4,4 +4,6 @@ object FirestoreSchema {
     const val EXECUTION_HISTORY_COLLECTION = "executionHistory"
     const val MEDICAL_PRESCRIPTION_COLLECTION = "medicalPrescription"
     const val PILL_PACK_COLLECTION = "pillPack"
+    const val ANVISA_MEDICATIONS_COLLECTION = "anvisaMedications"
+    const val SYSTEM_PROCESS_CONTROL_COLLECTION = "systemProcessControl"
 }

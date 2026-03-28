@@ -1,23 +1,40 @@
 package br.com.buscamed.core.config
 
+import br.com.buscamed.api.v1.anvisa.AnvisaController
 import br.com.buscamed.api.v1.pillpack.PillPackController
 import br.com.buscamed.api.v1.prescription.PrescriptionController
+import br.com.buscamed.data.client.anvisa.AnvisaIntegrationClient
+import br.com.buscamed.data.client.anvisa.AnvisaIntegrationKtorClient
+import br.com.buscamed.data.client.core.HttpClientFactory
 import br.com.buscamed.data.client.gemini.image.GeminiMedicalPrescriptionImageProcessClient
 import br.com.buscamed.data.client.gemini.image.GeminiPillPackImageProcessClient
 import br.com.buscamed.data.client.gemini.text.GeminiMedicalPrescriptionTextProcessClient
 import br.com.buscamed.data.client.gemini.text.GeminiPillPackTextProcessClient
+import br.com.buscamed.data.client.storage.google.csv.AnvisaCsvGoogleStorageClient
 import br.com.buscamed.data.client.storage.google.image.MedicalPrescriptionGoogleStorageClient
 import br.com.buscamed.data.client.storage.google.image.PillPackGoogleStorageClient
+import br.com.buscamed.data.datasource.FirestoreAnvisaMedicationDataSource
 import br.com.buscamed.data.datasource.FirestoreMedicalPrescriptionExecutionHistoryDataSource
 import br.com.buscamed.data.datasource.FirestorePillPackExecutionHistoryDataSource
+import br.com.buscamed.data.datasource.FirestoreSystemProcessControlDataSource
+import br.com.buscamed.data.datasource.interfaces.AnvisaMedicationDataSource
 import br.com.buscamed.data.datasource.interfaces.LLMExecutionHistoryDataSource
-import br.com.buscamed.data.repository.MedicalPrescriptionExecutionHistoryRepository
-import br.com.buscamed.data.repository.PillPackExecutionHistoryRepository
+import br.com.buscamed.data.datasource.interfaces.SystemProcessControlDataSource
+import br.com.buscamed.data.parser.ApacheCommonsAnvisaCsvParser
+import br.com.buscamed.data.repository.AnvisaMedicationRepositoryImpl
+import br.com.buscamed.data.repository.MedicalPrescriptionExecutionHistoryRepositoryImpl
+import br.com.buscamed.data.repository.PillPackExecutionHistoryRepositoryImpl
+import br.com.buscamed.data.repository.SystemProcessControlRepositoryImpl
+import br.com.buscamed.domain.parser.AnvisaCsvParser
+import br.com.buscamed.domain.repository.AnvisaMedicationRepository
 import br.com.buscamed.domain.repository.LLMExecutionHistoryRepository
+import br.com.buscamed.domain.repository.SystemProcessControlRepository
+import br.com.buscamed.domain.usecase.ImportAnvisaInformationUseCase
 import br.com.buscamed.domain.usecase.ProcessMedicalPrescriptionImageUseCase
 import br.com.buscamed.domain.usecase.ProcessMedicalPrescriptionTextUseCase
 import br.com.buscamed.domain.usecase.ProcessPillPackImageUseCase
 import br.com.buscamed.domain.usecase.ProcessPillPackTextUseCase
+import io.ktor.client.HttpClient
 import io.ktor.server.application.*
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -65,24 +82,48 @@ fun appModule(environment: ApplicationEnvironment) = module {
     }
 
     factory<LLMExecutionHistoryRepository>(named(DiQualifiers.REPO_MEDICAL_PRESCRIPTION)) {
-        MedicalPrescriptionExecutionHistoryRepository(
+        MedicalPrescriptionExecutionHistoryRepositoryImpl(
             dataSource = get(named(DiQualifiers.DS_MEDICAL_PRESCRIPTION))
         )
     }
 
     factory<LLMExecutionHistoryRepository>(named(DiQualifiers.REPO_PILL_PACK)) {
-        PillPackExecutionHistoryRepository(
+        PillPackExecutionHistoryRepositoryImpl(
             dataSource = get(named(DiQualifiers.DS_PILL_PACK))
+        )
+    }
+
+    factory<AnvisaMedicationDataSource> {
+        FirestoreAnvisaMedicationDataSource()
+    }
+
+    factory<AnvisaMedicationRepository> {
+        AnvisaMedicationRepositoryImpl(
+            dataSource = get()
+        )
+    }
+
+    factory<SystemProcessControlDataSource> {
+        FirestoreSystemProcessControlDataSource()
+    }
+
+    factory<SystemProcessControlRepository> {
+        SystemProcessControlRepositoryImpl(
+            dataSource = get()
         )
     }
 
     single { MedicalPrescriptionGoogleStorageClient() }
     single { PillPackGoogleStorageClient() }
+    single { AnvisaCsvGoogleStorageClient() }
 
     single { GeminiMedicalPrescriptionImageProcessClient(environment) }
     single { GeminiPillPackImageProcessClient(environment) }
     single { GeminiMedicalPrescriptionTextProcessClient(environment) }
     single { GeminiPillPackTextProcessClient(environment) }
+
+    single<AnvisaIntegrationClient> { AnvisaIntegrationKtorClient() }
+    single<AnvisaCsvParser> { ApacheCommonsAnvisaCsvParser() }
 
     factory {
         ProcessMedicalPrescriptionImageUseCase(
@@ -125,6 +166,22 @@ fun appModule(environment: ApplicationEnvironment) = module {
         PillPackController(
             processImageUseCase = get(),
             processTextUseCase = get()
+        )
+    }
+
+    factory {
+        ImportAnvisaInformationUseCase(
+            integrationClient = get(),
+            csvParser = get(),
+            medicationRepository = get(),
+            storageClient = get(),
+            processControlRepository = get()
+        )
+    }
+
+    factory {
+        AnvisaController(
+            importAnvisaInformationUseCase = get()
         )
     }
 }

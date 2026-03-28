@@ -5,7 +5,7 @@ import br.com.buscamed.data.mapper.toDocument
 import br.com.buscamed.domain.model.LLMExecutionHistory
 import br.com.buscamed.domain.repository.LLMExecutionHistoryRepository
 
-class PillPackExecutionHistoryRepository(
+class MedicalPrescriptionExecutionHistoryRepositoryImpl(
     private val dataSource: LLMExecutionHistoryDataSource
 ): LLMExecutionHistoryRepository {
 
