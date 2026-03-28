@@ -8,17 +8,17 @@ import com.google.cloud.firestore.annotation.DocumentId
  */
 data class AnvisaMedicationDocument(
     @DocumentId
-    override val id: String?,
-    val activeIngredients: List<String>,
-    val cnpj: String,
-    val laboratory: String,
-    val ean1: String?,
-    val ean2: String?,
-    val ean3: String?,
-    val productName: String,
-    val presentation: String,
-    val therapeuticClass: String,
-    val productType: String,
-    val isHospitalRestriction: Boolean,
-    val stripe: String
+    override val id: String? = null,
+    val activeIngredients: List<String> = emptyList(),
+    val cnpj: String = "",
+    val laboratory: String = "",
+    val ean1: String? = null,
+    val ean2: String? = null,
+    val ean3: String? = null,
+    val productName: String = "",
+    val presentation: String = "",
+    val therapeuticClass: String = "",
+    val productType: String = "",
+    val isHospitalRestriction: Boolean = false,
+    val stripe: String = ""
 ) : FirestoreDocument

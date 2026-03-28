@@ -29,6 +29,8 @@ import br.com.buscamed.domain.parser.AnvisaCsvParser
 import br.com.buscamed.domain.repository.AnvisaMedicationRepository
 import br.com.buscamed.domain.repository.LLMExecutionHistoryRepository
 import br.com.buscamed.domain.repository.SystemProcessControlRepository
+import br.com.buscamed.domain.usecase.GetMedicalPrescriptionHistoryUseCase
+import br.com.buscamed.domain.usecase.GetPillPackHistoryUseCase
 import br.com.buscamed.domain.usecase.ImportAnvisaInformationUseCase
 import br.com.buscamed.domain.usecase.ProcessMedicalPrescriptionImageUseCase
 import br.com.buscamed.domain.usecase.ProcessMedicalPrescriptionTextUseCase
@@ -158,14 +160,16 @@ fun appModule(environment: ApplicationEnvironment) = module {
     factory {
         PrescriptionController(
             processImageUseCase = get(),
-            processTextUseCase = get()
+            processTextUseCase = get(),
+            getHistoryUseCase = get()
         )
     }
 
     factory {
         PillPackController(
             processImageUseCase = get(),
-            processTextUseCase = get()
+            processTextUseCase = get(),
+            getHistoryUseCase = get()
         )
     }
 
@@ -182,6 +186,34 @@ fun appModule(environment: ApplicationEnvironment) = module {
     factory {
         AnvisaController(
             importAnvisaInformationUseCase = get()
+        )
+    }
+
+    factory {
+        GetMedicalPrescriptionHistoryUseCase(
+            repository = get(named(DiQualifiers.REPO_MEDICAL_PRESCRIPTION))
+        )
+    }
+
+    factory {
+        PrescriptionController(
+            processImageUseCase = get(),
+            processTextUseCase = get(),
+            getHistoryUseCase = get()
+        )
+    }
+
+    factory {
+        GetPillPackHistoryUseCase(
+            repository = get(named(DiQualifiers.REPO_PILL_PACK))
+        )
+    }
+
+    factory {
+        PillPackController(
+            processImageUseCase = get(),
+            processTextUseCase = get(),
+            getHistoryUseCase = get()
         )
     }
 }

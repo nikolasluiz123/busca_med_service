@@ -3,6 +3,7 @@ package br.com.buscamed.api.v1.prescription
 import br.com.buscamed.core.config.security.AuthConstants
 import io.ktor.server.auth.authenticate
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import org.koin.ktor.ext.inject
@@ -21,6 +22,13 @@ fun Route.prescriptionRoutes() {
 
             post(PrescriptionRoutes.PROCESS_TEXT) {
                 controller.processText(call)
+            }
+
+        }
+
+        authenticate(AuthConstants.AUTH_GOOGLE_OIDC_NAME) {
+            get(PrescriptionRoutes.HISTORY) {
+                controller.getHistory(call)
             }
         }
     }

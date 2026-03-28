@@ -21,5 +21,11 @@ fun Route.pillPackRoutes() {
                 controller.processText(call)
             }
         }
+
+        authenticate(AuthConstants.AUTH_GOOGLE_OIDC_NAME) {
+            get(PillPackRoutes.HISTORY) {
+                controller.getHistory(call)
+            }
+        }
     }
 }

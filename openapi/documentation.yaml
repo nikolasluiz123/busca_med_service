@@ -9,12 +9,11 @@ servers:
   - url: http://localhost:8080
     description: Servidor Local
 
-# Documentação padrão de segurança requerida pelo Ktor Auth
 security:
   - bearerAuth: []
 
 paths:
-  /v1/prescription/process-image:
+  /v1/prescription/process/image:
     post:
       summary: Processa a imagem de uma prescrição médica
       description: Recebe o arquivo de imagem de uma receita médica e extrai os dados estruturados dos medicamentos receitados (nome, dosagem, frequência e duração).
@@ -60,7 +59,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponseDTO'
 
-  /v1/prescription/process-text:
+  /v1/prescription/process/text:
     post:
       summary: Processa o texto de uma prescrição médica
       description: Recebe o texto contendo uma prescrição médica e extrai os dados estruturados dos medicamentos receitados.
@@ -88,7 +87,41 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
-  /v1/pillpack/process-image:
+  /v1/prescription/history:
+    get:
+      summary: Obtém o histórico de processamentos de prescrições médicas
+      description: Retorna uma lista de execuções da LLM para prescrições médicas. É possível filtrar a partir de uma data específica. Requer autenticação OIDC de serviço.
+      tags:
+        - Prescription
+      parameters:
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date-time
+          required: false
+          description: Filtro de data de início no formato ISO-8601. Se omitido, retorna desde o início (Epoch).
+          example: "2026-03-01T00:00:00Z"
+      responses:
+        '200':
+          description: Histórico recuperado com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LLMExecutionHistoryResponseDTO'
+        '400':
+          description: Formato de data inválido
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "O formato da data 'startDate' é inválido. Utilize o padrão ISO-8601."
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /v1/pillpack/process/image:
     post:
       summary: Processa a imagem de uma cartela de comprimidos
       description: Recebe o arquivo de imagem do verso de uma cartela (blister) e extrai o princípio ativo, dosagem e data de validade.
@@ -128,7 +161,7 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
-  /v1/pillpack/process-text:
+  /v1/pillpack/process/text:
     post:
       summary: Processa o texto de uma cartela de comprimidos
       description: Recebe a transcrição de texto do verso de uma cartela de comprimidos e estrutura os dados.
@@ -153,6 +186,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponseDTO'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /v1/pillpack/history:
+    get:
+      summary: Obtém o histórico de processamentos de cartelas de comprimidos
+      description: Retorna uma lista de execuções da LLM para cartelas de comprimidos. É possível filtrar a partir de uma data específica. Requer autenticação OIDC de serviço.
+      tags:
+        - Pill Pack
+      parameters:
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date-time
+          required: false
+          description: Filtro de data de início no formato ISO-8601. Se omitido, retorna desde o início (Epoch).
+          example: "2026-03-01T00:00:00Z"
+      responses:
+        '200':
+          description: Histórico recuperado com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LLMExecutionHistoryResponseDTO'
+        '400':
+          description: Formato de data inválido
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "O formato da data 'startDate' é inválido. Utilize o padrão ISO-8601."
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
@@ -181,7 +248,10 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: |
-        Insira o token JWT retornado pelo Google Identity / OIDC. 
+        Insira o token JWT retornado pelo Google Identity / OIDC / Firebase. 
+        Para requisições administrativas (OIDC), você pode gerar um token usando impersonation de uma Service Account através do comando local:
+        `gcloud auth print-identity-token --impersonate-service-account=SUA_SERVICE_ACCOUNT@SEU_PROJETO.iam.gserviceaccount.com --include-email`
+        
         Exemplo: `Bearer eyJhbGciOiJSUzI1...`
 
   responses:
@@ -224,6 +294,46 @@ components:
           nullable: true
           description: ID de rastreamento no Google Cloud Trace.
           example: "105445aa7843bc8bf206b12000100000"
+
+    LLMExecutionHistoryResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+          description: Identificador único da execução.
+          example: "8f7311f4-3079-4be6-a6fb-96f7c8585c5b"
+        inputTokens:
+          type: integer
+          description: Quantidade de tokens enviados no prompt.
+          example: 125
+        outputTokens:
+          type: integer
+          description: Quantidade de tokens retornados pela LLM.
+          example: 45
+        result:
+          type: string
+          nullable: true
+          description: Resultado formatado em JSON retornado pela LLM (em formato string).
+        success:
+          type: boolean
+          description: Indica se a execução foi finalizada com sucesso.
+          example: true
+        startDate:
+          type: string
+          format: date-time
+          description: Data e hora de início da execução.
+          example: "2026-03-27T10:15:30Z"
+        endDate:
+          type: string
+          format: date-time
+          description: Data e hora de término da execução.
+          example: "2026-03-27T10:15:35Z"
+        storageImagePath:
+          type: string
+          nullable: true
+          description: Caminho do arquivo de imagem salvo no storage.
+          example: "gs://gemini_processed_images/medical_prescription/123.jpg"
 
     PrescriptionResponse:
       type: object

@@ -7,4 +7,5 @@ object PillPackRoutes {
     const val V1_ROOT = "/v1/pillpack"
     const val PROCESS_IMAGE = "/process/image"
     const val PROCESS_TEXT = "/process/text"
+    const val HISTORY = "/history"
 }

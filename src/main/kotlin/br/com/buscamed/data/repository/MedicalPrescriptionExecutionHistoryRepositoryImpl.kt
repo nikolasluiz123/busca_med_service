@@ -2,8 +2,10 @@ package br.com.buscamed.data.repository
 
 import br.com.buscamed.data.datasource.interfaces.LLMExecutionHistoryDataSource
 import br.com.buscamed.data.mapper.toDocument
+import br.com.buscamed.data.mapper.toDomain
 import br.com.buscamed.domain.model.LLMExecutionHistory
 import br.com.buscamed.domain.repository.LLMExecutionHistoryRepository
+import java.time.Instant
 
 class MedicalPrescriptionExecutionHistoryRepositoryImpl(
     private val dataSource: LLMExecutionHistoryDataSource
@@ -15,5 +17,9 @@ class MedicalPrescriptionExecutionHistoryRepositoryImpl(
 
     override suspend fun updateImageStoragePath(historyId: String, path: String) {
         dataSource.updateImageStoragePath(historyId, path)
+    }
+
+    override suspend fun findHistorySince(startDate: Instant): List<LLMExecutionHistory> {
+        return dataSource.findHistorySince(startDate).map { it.toDomain() }
     }
 }

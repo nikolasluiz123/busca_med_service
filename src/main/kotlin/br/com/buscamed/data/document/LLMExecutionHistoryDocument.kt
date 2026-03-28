@@ -8,14 +8,14 @@ import java.time.Instant
 
 data class LLMExecutionHistoryDocument(
     @DocumentId
-    override val id: String?,
-    val inputTokens: Int,
-    val outputTokens: Int,
-    val result: String?,
-    val success: Boolean,
+    override val id: String? = null,
+    val inputTokens: Int = 0,
+    val outputTokens: Int = 0,
+    val result: String? = null,
+    val success: Boolean = false,
     @Serializable(with = InstantSerializer::class)
-    val startDate: Instant,
+    val startDate: Instant = Instant.now(),
     @Serializable(with = InstantSerializer::class)
-    val endDate: Instant,
-    val storageImagePath: String?
+    val endDate: Instant = Instant.now(),
+    val storageImagePath: String? = null
 ) : FirestoreDocument
