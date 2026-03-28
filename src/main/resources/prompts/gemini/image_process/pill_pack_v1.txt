@@ -1,10 +1,36 @@
 Extraia as informações do texto impresso no verso da cartela de comprimidos (blister) presente na imagem.
 Siga estritamente a estrutura JSON abaixo:
 {
-  "principio_ativo": "Nome do princípio ativo",
-  "dosagem": "Dosagem",
-  "data_validade": "Data de validade impressa"
+  "nome_medicamento": "string | null",
+  "componentes": [
+    {
+      "principio_ativo": "string",
+      "dosagem_valor": "number | null",
+      "dosagem_unidade": "string | null"
+    }
+  ],
+  "uso": {
+    "vias_administracao": ["string"],
+    "restricoes_idade": ["string"]
+  },
+  "indicacoes": ["string"],
+  "data_validade": "string | null",
+  "lote": "string | null"
 }
-Regras:
-1. A data de validade é a informação mais crítica. Busque por padrões visuais próximos a "Val", "V", "Exp" ou datas (ex: 10/25, OUT 2026).
-2. Se a tinta estiver apagada, refletindo luz, ou se o dado não constar na imagem, retorne null no campo correspondente. Não invente informações.
+
+Regras de Extração e Preenchimento:
+
+1. Data de Validade e Lote: A data de validade é a informação mais crítica. Busque por padrões visuais próximos a "Val", "V", "Exp" ou datas (ex: 10/25, OUT 2026).
+2. Nome e Componentes:
+   - Se a cartela exibir um nome comercial, preencha "nome_medicamento" com ele e liste os princípios ativos menores no array "componentes".
+   - Se o medicamento for genérico, preencha "nome_medicamento" e "principio_ativo" com o mesmo valor.
+3. Dosagem (Valor e Unidade):
+   - Separe a quantidade numérica da unidade de medida.
+   - O campo "dosagem_valor" deve ser estritamente numérico (ex: 500, 1, 4.5).
+   - O campo "dosagem_unidade" deve conter apenas a unidade padronizada, convertendo por extenso para sigla quando necessário (ex: "mg", "g", "ml", "UI").
+4. Uso e Indicações:
+   - "vias_administracao": Extraia termos como "Uso oral", "Uso sublingual", etc. Se não houver, retorne [].
+   - "restricoes_idade": Extraia termos como "Uso adulto", "Uso pediátrico", "Acima de 12 anos". Se não houver, retorne [].
+   - "indicacoes": Extraia os sintomas que o medicamento alivia. Se não houver, retorne [].
+5. Tratamento de Falhas: Se a tinta estiver apagada, refletindo luz, ou se um dado não constar na imagem, retorne null nos campos simples ou arrays vazios [] nas listas.
+6. Veracidade: Não invente, deduza ou pesquise informações externas para completar campos não visíveis na imagem. Baseie-se exclusivamente no texto lido na cartela.

@@ -3,13 +3,35 @@ Siga estritamente a estrutura JSON abaixo:
 {
   "medicamentos": [
     {
-      "nome": "Nome do medicamento",
-      "dosagem": "Dosagem",
-      "frequencia": "Frequência de uso",
-      "duracao": "Duração do tratamento"
+      "nome": "string",
+      "apresentacao_dosagem": {
+        "valor": "number | null",
+        "unidade": "string | null"
+      },
+      "dose": {
+        "valor": "number | null",
+        "unidade": "string | null"
+      },
+      "frequencia": {
+        "intervalo": "number | null",
+        "unidade": "string | null",
+        "texto_orientacao": "string | null"
+      },
+      "duracao": {
+        "valor": "number | null",
+        "unidade": "string | null",
+        "uso_continuo": "boolean"
+      },
+      "quantidade_total_prescrita": {
+        "valor": "number | null",
+        "unidade": "string | null"
+      }
     }
   ]
 }
 Regras:
 1. Caso a imagem contenha múltiplos medicamentos, adicione novos objetos à lista.
 2. Se qualquer informação estiver ilegível, cortada ou ausente, defina o valor do campo como null. Não invente informações.
+3. Campos Numéricos: Os campos "valor" e "intervalo" devem conter APENAS números. Letras, símbolos ou palavras devem ser extraídos para o respectivo campo "unidade" ou "texto_orientacao".
+4. Frequência e Orientação: Se a instrução de uso for baseada em tempo exato (ex: "de 12 em 12 horas"), preencha "intervalo" e "unidade". Se a instrução for situacional (ex: "após o almoço", "se tiver febre"), preencha "intervalo" e "unidade" como null e insira a instrução original em "texto_orientacao".
+5. Duração e Uso Contínuo: Se a prescrição indicar "uso contínuo", "uso prolongado" ou equivalente, defina "uso_continuo" como true e os campos "valor" e "unidade" da duração como null.

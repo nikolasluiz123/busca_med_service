@@ -1,10 +1,29 @@
 Extraia as informações da cartela de comprimidos a partir do texto fornecido.
 Siga estritamente a estrutura JSON abaixo:
 {
-  "principio_ativo": "Nome do princípio ativo",
-  "dosagem": "Dosagem",
-  "data_validade": "Data de validade"
+  "nome_medicamento": "string | null",
+  "componentes": [
+    {
+      "principio_ativo": "string",
+      "dosagem_valor": "number | null",
+      "dosagem_unidade": "string | null"
+    }
+  ],
+  "uso": {
+    "vias_administracao": ["string"],
+    "restricoes_idade": ["string"]
+  },
+  "indicacoes": ["string"],
+  "data_validade": "string | null",
+  "lote": "string | null"
 }
+
 Regras:
-1. O texto contém a transcrição do verso de um medicamento. A data de validade é o foco principal.
-2. Se qualquer um dos dados solicitados não estiver claramente descrito no texto, defina o valor do campo como null. Não faça suposições.
+1. O texto contém a transcrição (via OCR) do verso de uma embalagem de medicamento.
+2. Correção de Ruídos (OCR): O texto pode conter erros de leitura causados por reflexos ou amassados (ex: "Parac3tam0l", "500 nq", "cIorfeniramina"). Você deve corrigir esses erros de digitação óbvios para o termo médico e unidade de medida corretos antes de preencher o JSON.
+3.  A data de validade é o foco principal. Extraia no formato que encontrar (ex: 10/25, OUT 2026).
+4. Nome e Componentes:
+   - Se houver nome comercial explícito, coloque em "nome_medicamento" e liste os ativos em "componentes".
+   - Se for medicamento genérico, use o mesmo nome para "nome_medicamento" e "principio_ativo".
+5. Separação de Dosagem: Separe o valor numérico (number) da unidade padronizada (string, ex: "mg", "g", "ml").
+6. Não faça suposições. Se qualquer um dos dados solicitados não estiver claramente descrito no texto (mesmo considerando os pequenos ajustes de correção de OCR citados na Regra 2), defina o valor do campo como null nos campos simples ou retorne arrays vazios [] nas listas.
