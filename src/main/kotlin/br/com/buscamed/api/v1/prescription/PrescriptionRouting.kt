@@ -30,6 +30,10 @@ fun Route.prescriptionRoutes() {
             get(PrescriptionRoutes.HISTORY) {
                 controller.getHistory(call)
             }
+
+            get(PrescriptionRoutes.IMAGE) {
+                controller.downloadImage(call)
+            }
         }
     }
 }

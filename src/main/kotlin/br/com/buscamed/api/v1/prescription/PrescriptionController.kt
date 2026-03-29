@@ -3,6 +3,7 @@ package br.com.buscamed.api.v1.prescription
 import br.com.buscamed.api.v1.dto.request.TextRequestDTO
 import br.com.buscamed.api.v1.extensions.extractImageMultipart
 import br.com.buscamed.data.mapper.toDTO
+import br.com.buscamed.domain.usecase.DownloadImageUseCase
 import br.com.buscamed.domain.usecase.GetMedicalPrescriptionHistoryUseCase
 import br.com.buscamed.domain.usecase.ProcessMedicalPrescriptionImageUseCase
 import br.com.buscamed.domain.usecase.ProcessMedicalPrescriptionTextUseCase
@@ -10,6 +11,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondBytes
 import java.time.Instant
 import java.time.format.DateTimeParseException
 
@@ -18,11 +20,14 @@ import java.time.format.DateTimeParseException
  *
  * @property processImageUseCase Caso de uso para processamento de imagens de prescrições.
  * @property processTextUseCase Caso de uso para processamento de textos de prescrições.
+ * @property getHistoryUseCase Caso de uso para resgate de histórico.
+ * @property downloadImageUseCase Caso de uso para download da imagem.
  */
 class PrescriptionController(
     private val processImageUseCase: ProcessMedicalPrescriptionImageUseCase,
     private val processTextUseCase: ProcessMedicalPrescriptionTextUseCase,
-    private val getHistoryUseCase: GetMedicalPrescriptionHistoryUseCase
+    private val getHistoryUseCase: GetMedicalPrescriptionHistoryUseCase,
+    private val downloadImageUseCase: DownloadImageUseCase
 ) {
 
     /**
@@ -69,5 +74,26 @@ class PrescriptionController(
 
         val historyList = getHistoryUseCase(startDate).map { it.toDTO() }
         call.respond(HttpStatusCode.OK, historyList)
+    }
+
+    /**
+     * Processa a requisição para realizar o download da imagem de prescrição médica.
+     *
+     * @param call O contexto da requisição Ktor.
+     */
+    suspend fun downloadImage(call: ApplicationCall) {
+        val executionId = call.request.queryParameters["executionId"]
+        
+        val (imageBytes, contentType) = downloadImageUseCase(executionId)
+
+        if (imageBytes != null) {
+            call.respondBytes(
+                bytes = imageBytes, 
+                contentType = contentType,
+                status = HttpStatusCode.OK
+            )
+        } else {
+            call.respond(HttpStatusCode.NoContent)
+        }
     }
 }

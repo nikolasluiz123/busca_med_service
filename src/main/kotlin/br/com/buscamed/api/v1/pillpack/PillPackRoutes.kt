@@ -8,4 +8,5 @@ object PillPackRoutes {
     const val PROCESS_IMAGE = "/process/image"
     const val PROCESS_TEXT = "/process/text"
     const val HISTORY = "/history"
+    const val IMAGE = "/image"
 }

@@ -26,6 +26,10 @@ fun Route.pillPackRoutes() {
             get(PillPackRoutes.HISTORY) {
                 controller.getHistory(call)
             }
+
+            get(PillPackRoutes.IMAGE) {
+                controller.downloadImage(call)
+            }
         }
     }
 }

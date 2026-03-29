@@ -3,6 +3,7 @@ package br.com.buscamed.api.v1.pillpack
 import br.com.buscamed.api.v1.dto.request.TextRequestDTO
 import br.com.buscamed.api.v1.extensions.extractImageMultipart
 import br.com.buscamed.data.mapper.toDTO
+import br.com.buscamed.domain.usecase.DownloadImageUseCase
 import br.com.buscamed.domain.usecase.GetPillPackHistoryUseCase
 import br.com.buscamed.domain.usecase.ProcessPillPackImageUseCase
 import br.com.buscamed.domain.usecase.ProcessPillPackTextUseCase
@@ -10,6 +11,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondBytes
 import java.time.Instant
 import java.time.format.DateTimeParseException
 
@@ -19,11 +21,13 @@ import java.time.format.DateTimeParseException
  * @property processImageUseCase Caso de uso para processamento de imagens de cartelas.
  * @property processTextUseCase Caso de uso para processamento de textos de cartelas.
  * @property getHistoryUseCase Caso de uso para resgate de histórico.
+ * @property downloadImageUseCase Caso de uso para download da imagem.
  */
 class PillPackController(
     private val processImageUseCase: ProcessPillPackImageUseCase,
     private val processTextUseCase: ProcessPillPackTextUseCase,
-    private val getHistoryUseCase: GetPillPackHistoryUseCase
+    private val getHistoryUseCase: GetPillPackHistoryUseCase,
+    private val downloadImageUseCase: DownloadImageUseCase
 ) {
 
     /**
@@ -70,5 +74,26 @@ class PillPackController(
 
         val historyList = getHistoryUseCase(startDate).map { it.toDTO() }
         call.respond(HttpStatusCode.OK, historyList)
+    }
+
+    /**
+     * Processa a requisição para realizar o download da imagem de cartelas de comprimidos.
+     *
+     * @param call O contexto da requisição Ktor.
+     */
+    suspend fun downloadImage(call: ApplicationCall) {
+        val executionId = call.request.queryParameters["executionId"]
+        
+        val (imageBytes, contentType) = downloadImageUseCase(executionId)
+
+        if (imageBytes != null) {
+            call.respondBytes(
+                bytes = imageBytes, 
+                contentType = contentType,
+                status = HttpStatusCode.OK
+            )
+        } else {
+            call.respond(HttpStatusCode.NoContent)
+        }
     }
 }

@@ -29,6 +29,8 @@ import br.com.buscamed.domain.parser.AnvisaCsvParser
 import br.com.buscamed.domain.repository.AnvisaMedicationRepository
 import br.com.buscamed.domain.repository.LLMExecutionHistoryRepository
 import br.com.buscamed.domain.repository.SystemProcessControlRepository
+import br.com.buscamed.domain.usecase.DownloadImageUseCase
+import br.com.buscamed.domain.usecase.GetContentTypeByExtensionUseCase
 import br.com.buscamed.domain.usecase.GetMedicalPrescriptionHistoryUseCase
 import br.com.buscamed.domain.usecase.GetPillPackHistoryUseCase
 import br.com.buscamed.domain.usecase.ImportAnvisaInformationUseCase
@@ -53,6 +55,9 @@ object DiQualifiers {
 
     const val REPO_MEDICAL_PRESCRIPTION = "RepositoryMedicalPrescription"
     const val REPO_PILL_PACK = "RepositoryPillPack"
+    
+    const val UC_DOWNLOAD_MEDICAL_PRESCRIPTION_IMAGE = "DownloadMedicalPrescriptionImageUseCase"
+    const val UC_DOWNLOAD_PILL_PACK_IMAGE = "DownloadPillPackImageUseCase"
 }
 
 /**
@@ -158,10 +163,41 @@ fun appModule(environment: ApplicationEnvironment) = module {
     }
 
     factory {
+        GetMedicalPrescriptionHistoryUseCase(
+            repository = get(named(DiQualifiers.REPO_MEDICAL_PRESCRIPTION))
+        )
+    }
+
+    factory {
+        GetPillPackHistoryUseCase(
+            repository = get(named(DiQualifiers.REPO_PILL_PACK))
+        )
+    }
+
+    factory { GetContentTypeByExtensionUseCase() }
+
+    factory(named(DiQualifiers.UC_DOWNLOAD_MEDICAL_PRESCRIPTION_IMAGE)) {
+        DownloadImageUseCase(
+            executionHistoryDataSource = get(named(DiQualifiers.DS_MEDICAL_PRESCRIPTION)),
+            storageClient = get<MedicalPrescriptionGoogleStorageClient>(),
+            getContentTypeByExtensionUseCase = get()
+        )
+    }
+
+    factory(named(DiQualifiers.UC_DOWNLOAD_PILL_PACK_IMAGE)) {
+        DownloadImageUseCase(
+            executionHistoryDataSource = get(named(DiQualifiers.DS_PILL_PACK)),
+            storageClient = get<PillPackGoogleStorageClient>(),
+            getContentTypeByExtensionUseCase = get()
+        )
+    }
+
+    factory {
         PrescriptionController(
             processImageUseCase = get(),
             processTextUseCase = get(),
-            getHistoryUseCase = get()
+            getHistoryUseCase = get(),
+            downloadImageUseCase = get(named(DiQualifiers.UC_DOWNLOAD_MEDICAL_PRESCRIPTION_IMAGE))
         )
     }
 
@@ -169,7 +205,8 @@ fun appModule(environment: ApplicationEnvironment) = module {
         PillPackController(
             processImageUseCase = get(),
             processTextUseCase = get(),
-            getHistoryUseCase = get()
+            getHistoryUseCase = get(),
+            downloadImageUseCase = get(named(DiQualifiers.UC_DOWNLOAD_PILL_PACK_IMAGE))
         )
     }
 
@@ -186,34 +223,6 @@ fun appModule(environment: ApplicationEnvironment) = module {
     factory {
         AnvisaController(
             importAnvisaInformationUseCase = get()
-        )
-    }
-
-    factory {
-        GetMedicalPrescriptionHistoryUseCase(
-            repository = get(named(DiQualifiers.REPO_MEDICAL_PRESCRIPTION))
-        )
-    }
-
-    factory {
-        PrescriptionController(
-            processImageUseCase = get(),
-            processTextUseCase = get(),
-            getHistoryUseCase = get()
-        )
-    }
-
-    factory {
-        GetPillPackHistoryUseCase(
-            repository = get(named(DiQualifiers.REPO_PILL_PACK))
-        )
-    }
-
-    factory {
-        PillPackController(
-            processImageUseCase = get(),
-            processTextUseCase = get(),
-            getHistoryUseCase = get()
         )
     }
 }

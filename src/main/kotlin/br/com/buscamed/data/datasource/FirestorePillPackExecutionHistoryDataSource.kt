@@ -46,4 +46,15 @@ class FirestorePillPackExecutionHistoryDataSource : BaseFirestoreDataSource(), L
             it.toObject(LLMExecutionHistoryDocument::class.java)
         }
     }
+
+    override suspend fun findHistoryById(historyId: String): LLMExecutionHistoryDocument? {
+        val documentSnapshot = db.collection(EXECUTION_HISTORY_COLLECTION)
+            .document(PILL_PACK_COLLECTION)
+            .collection(RECORDS_COLLECTION)
+            .document(historyId)
+            .get()
+            .get()
+            
+        return documentSnapshot.toObject(LLMExecutionHistoryDocument::class.java)
+    }
 }

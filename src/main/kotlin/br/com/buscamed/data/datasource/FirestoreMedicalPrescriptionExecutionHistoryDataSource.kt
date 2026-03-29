@@ -46,4 +46,15 @@ class FirestoreMedicalPrescriptionExecutionHistoryDataSource : BaseFirestoreData
             it.toObject(LLMExecutionHistoryDocument::class.java)
         }
     }
+
+    override suspend fun findHistoryById(historyId: String): LLMExecutionHistoryDocument? {
+        val documentSnapshot = db.collection(EXECUTION_HISTORY_COLLECTION)
+            .document(MEDICAL_PRESCRIPTION_COLLECTION)
+            .collection(RECORDS_COLLECTION)
+            .document(historyId)
+            .get()
+            .get()
+            
+        return documentSnapshot.toObject(LLMExecutionHistoryDocument::class.java)
+    }
 }

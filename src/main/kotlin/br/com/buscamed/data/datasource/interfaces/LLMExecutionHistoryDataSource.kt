@@ -7,4 +7,5 @@ interface LLMExecutionHistoryDataSource {
     suspend fun save(history: LLMExecutionHistoryDocument): String
     suspend fun updateImageStoragePath(historyId: String, path: String)
     suspend fun findHistorySince(startDate: Instant): List<LLMExecutionHistoryDocument>
+    suspend fun findHistoryById(historyId: String): LLMExecutionHistoryDocument?
 }
