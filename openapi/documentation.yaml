@@ -16,7 +16,7 @@ paths:
   /v1/prescription/process/image:
     post:
       summary: Processa a imagem de uma prescrição médica
-      description: Recebe o arquivo de imagem de uma receita médica e extrai os dados estruturados dos medicamentos receitados (nome, dosagem, frequência e duração).
+      description: Recebe o arquivo de imagem de uma receita médica e extrai os dados estruturados dos medicamentos receitados.
       tags:
         - Prescription
       requestBody:
@@ -43,7 +43,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PrescriptionResponse'
+                $ref: '#/components/schemas/PrescriptionResponseDTO'
         '400':
           description: Requisição inválida ou imagem não fornecida
           content:
@@ -77,7 +77,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PrescriptionResponse'
+                $ref: '#/components/schemas/PrescriptionResponseDTO'
         '400':
           description: Requisição inválida
           content:
@@ -114,10 +114,39 @@ paths:
         '400':
           description: Formato de data inválido
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /v1/prescription/image:
+    get:
+      summary: Download da imagem da prescrição médica
+      description: Retorna os bytes da imagem processada com base no ID da execução. Requer autenticação OIDC de serviço.
+      tags:
+        - Prescription
+      parameters:
+        - in: query
+          name: executionId
+          schema:
+            type: string
+          required: true
+          description: ID da execução da LLM.
+      responses:
+        '200':
+          description: Imagem retornada com sucesso
+          content:
+            image/*:
               schema:
                 type: string
-                example: "O formato da data 'startDate' é inválido. Utilize o padrão ISO-8601."
+                format: binary
+        '404':
+          description: Imagem não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
@@ -151,7 +180,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PillPackResponse'
+                $ref: '#/components/schemas/PillPackResponseDTO'
         '400':
           description: Requisição inválida
           content:
@@ -179,7 +208,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PillPackResponse'
+                $ref: '#/components/schemas/PillPackResponseDTO'
         '400':
           description: Requisição inválida
           content:
@@ -216,10 +245,39 @@ paths:
         '400':
           description: Formato de data inválido
           content:
-            text/plain:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /v1/pillpack/image:
+    get:
+      summary: Download da imagem da cartela de comprimidos
+      description: Retorna os bytes da imagem processada com base no ID da execução. Requer autenticação OIDC de serviço.
+      tags:
+        - Pill Pack
+      parameters:
+        - in: query
+          name: executionId
+          schema:
+            type: string
+          required: true
+          description: ID da execução da LLM.
+      responses:
+        '200':
+          description: Imagem retornada com sucesso
+          content:
+            image/*:
               schema:
                 type: string
-                example: "O formato da data 'startDate' é inválido. Utilize o padrão ISO-8601."
+                format: binary
+        '404':
+          description: Imagem não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
@@ -251,8 +309,6 @@ components:
         Insira o token JWT retornado pelo Google Identity / OIDC / Firebase. 
         Para requisições administrativas (OIDC), você pode gerar um token usando impersonation de uma Service Account através do comando local:
         `gcloud auth print-identity-token --impersonate-service-account=SUA_SERVICE_ACCOUNT@SEU_PROJETO.iam.gserviceaccount.com --include-email`
-        
-        Exemplo: `Bearer eyJhbGciOiJSUzI1...`
 
   responses:
     UnauthorizedError:
@@ -288,7 +344,7 @@ components:
         path:
           type: string
           description: Caminho do endpoint que gerou o erro.
-          example: "/v1/prescription/process-image"
+          example: "/v1/prescription/process/image"
         traceId:
           type: string
           nullable: true
@@ -334,46 +390,134 @@ components:
           nullable: true
           description: Caminho do arquivo de imagem salvo no storage.
           example: "gs://gemini_processed_images/medical_prescription/123.jpg"
+        prompt:
+          type: string
+          description: Arquivo de prompt utilizado na requisição.
+          example: "medical_prescription_v1"
 
-    PrescriptionResponse:
+    ValueUnitDTO:
+      type: object
+      properties:
+        valor:
+          type: number
+          nullable: true
+          example: 500.0
+        unidade:
+          type: string
+          nullable: true
+          example: "mg"
+
+    FrequencyDTO:
+      type: object
+      properties:
+        intervalo:
+          type: number
+          nullable: true
+          example: 8.0
+        unidade:
+          type: string
+          nullable: true
+          example: "horas"
+        texto_orientacao:
+          type: string
+          nullable: true
+          example: "De 8 em 8 horas após as refeições"
+
+    DurationDTO:
+      type: object
+      properties:
+        valor:
+          type: number
+          nullable: true
+          example: 5.0
+        unidade:
+          type: string
+          nullable: true
+          example: "dias"
+        uso_continuo:
+          type: boolean
+          example: false
+
+    PrescriptionMedicationDTO:
+      type: object
+      properties:
+        nome:
+          type: string
+          nullable: true
+          example: "Amoxicilina"
+        apresentacao_dosagem:
+          $ref: '#/components/schemas/ValueUnitDTO'
+        dose:
+          $ref: '#/components/schemas/ValueUnitDTO'
+        frequencia:
+          $ref: '#/components/schemas/FrequencyDTO'
+        duracao:
+          $ref: '#/components/schemas/DurationDTO'
+        quantidade_total_prescrita:
+          $ref: '#/components/schemas/ValueUnitDTO'
+
+    PrescriptionResponseDTO:
       type: object
       description: Estrutura retornada pelo Gemini baseada no prompt de prescrição médica.
       properties:
         medicamentos:
           type: array
           items:
-            type: object
-            properties:
-              nome:
-                type: string
-                nullable: true
-                example: "Amoxicilina"
-              dosagem:
-                type: string
-                nullable: true
-                example: "500mg"
-              frequencia:
-                type: string
-                nullable: true
-                example: "De 8 em 8 horas"
-              duracao:
-                type: string
-                nullable: true
-                example: "7 dias"
+            $ref: '#/components/schemas/PrescriptionMedicationDTO'
 
-    PillPackResponse:
+    PillPackComponentDTO:
       type: object
-      description: Estrutura retornada pelo Gemini baseada no prompt de cartela de medicamentos.
       properties:
         principio_ativo:
           type: string
-          nullable: true
           example: "Paracetamol"
-        dosagem:
+        dosagem_valor:
+          type: number
+          nullable: true
+          example: 750.0
+        dosagem_unidade:
           type: string
           nullable: true
-          example: "750mg"
+          example: "mg"
+
+    PillPackUsageDTO:
+      type: object
+      properties:
+        vias_administracao:
+          type: array
+          items:
+            type: string
+          example: ["Uso oral"]
+        restricoes_idade:
+          type: array
+          items:
+            type: string
+          example: ["Uso adulto e pediátrico acima de 12 anos"]
+
+    PillPackResponseDTO:
+      type: object
+      description: Estrutura retornada pelo Gemini baseada no prompt de cartela de medicamentos.
+      properties:
+        nome_medicamento:
+          type: string
+          nullable: true
+          example: "Tylenol"
+        componentes:
+          type: array
+          items:
+            $ref: '#/components/schemas/PillPackComponentDTO'
+        uso:
+          $ref: '#/components/schemas/PillPackUsageDTO'
+        indicacoes:
+          type: array
+          items:
+            type: string
+          example: ["Dor", "Febre"]
         data_validade:
           type: string
           nullable: true
           example: "10/25"
+        lote:
+          type: string
+          nullable: true
+          example: "L123456"

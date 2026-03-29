@@ -19,8 +19,9 @@ fun Application.configureStatusPages() {
     install(StatusPages) {
         exception<BuscaMedException> { call, cause ->
             val traceId = call.response.headers["X-Cloud-Trace-Context"]
+            val ktorStatusCode = HttpStatusCode.fromValue(cause.statusCode)
 
-            if (cause.httpStatusCode.value >= 500) {
+            if (cause.statusCode >= 500) {
                 logger.error("Erro de Sistema [${cause.errorCode}]: ${cause.message}", cause)
 
                 if (cause is IntegrationException) {
@@ -31,7 +32,7 @@ fun Application.configureStatusPages() {
             }
 
             call.respond(
-                cause.httpStatusCode,
+                ktorStatusCode,
                 ErrorResponseDTO(
                     errorCode = cause.errorCode,
                     message = cause.userMessage,

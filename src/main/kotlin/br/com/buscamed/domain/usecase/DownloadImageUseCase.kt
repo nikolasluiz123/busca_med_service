@@ -1,31 +1,30 @@
 package br.com.buscamed.domain.usecase
 
-import br.com.buscamed.data.client.storage.core.StorageClient
-import br.com.buscamed.data.datasource.interfaces.LLMExecutionHistoryDataSource
+import br.com.buscamed.core.enumeration.SupportedImageFormat
 import br.com.buscamed.domain.exceptions.BusinessException
 import br.com.buscamed.domain.exceptions.ResourceNotFoundException
-import io.ktor.http.ContentType
+import br.com.buscamed.domain.repository.LLMExecutionHistoryRepository
+import br.com.buscamed.domain.service.ImageStorageService
 
 class DownloadImageUseCase(
-    private val executionHistoryDataSource: LLMExecutionHistoryDataSource,
-    private val storageClient: StorageClient,
-    private val getContentTypeByExtensionUseCase: GetContentTypeByExtensionUseCase
+    private val repository: LLMExecutionHistoryRepository,
+    private val storageService: ImageStorageService,
+    private val getSupportedImageFormatUseCase: GetSupportedImageFormatUseCase
 ) {
-    suspend operator fun invoke(executionId: String?): Pair<ByteArray?, ContentType> {
+    suspend operator fun invoke(executionId: String?): Pair<ByteArray?, SupportedImageFormat?> {
         if (executionId.isNullOrBlank()) {
             throw BusinessException("O parâmetro 'executionId' é obrigatório.")
         }
-        
-        val history = executionHistoryDataSource.findHistoryById(executionId) 
+
+        val history = repository.findHistoryById(executionId)
             ?: throw ResourceNotFoundException("Histórico não encontrado para o executionId: $executionId")
-        
-        val storageImagePath = history.storageImagePath ?: return Pair(null, ContentType.Image.Any)
-            
+
+        val storageImagePath = history.storageImagePath ?: return Pair(null, null)
+
         val fileName = storageImagePath.substringAfter("gs://").substringAfter("/")
-
         val extension = fileName.substringAfterLast('.', "")
-        val contentType = getContentTypeByExtensionUseCase(extension)
+        val format = getSupportedImageFormatUseCase(extension)
 
-        return Pair(storageClient.download(fileName), contentType)
+        return Pair(storageService.download(fileName), format)
     }
 }

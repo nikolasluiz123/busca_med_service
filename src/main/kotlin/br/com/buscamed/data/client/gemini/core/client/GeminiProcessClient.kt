@@ -4,11 +4,10 @@ import br.com.buscamed.core.config.properties.GeminiConfig
 import br.com.buscamed.data.client.core.llm.LLMProcessClient
 import br.com.buscamed.data.client.gemini.core.exception.GeminiErrorCodes
 import br.com.buscamed.data.client.gemini.core.exception.GeminiIntegrationException
-import br.com.buscamed.data.client.gemini.core.result.GeminiResult
+import br.com.buscamed.domain.model.LLMProcessResult
 import com.google.genai.Client
 import com.google.genai.types.GenerateContentConfig
 import com.google.genai.types.GenerateContentResponse
-import io.ktor.http.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
@@ -33,7 +32,7 @@ abstract class GeminiProcessClient(
             .build()
     }
 
-    protected fun processResponse(response: GenerateContentResponse): GeminiResult {
+    protected fun processResponse(response: GenerateContentResponse): LLMProcessResult {
         val usage = response.usageMetadata()?.get()
         val inputTokens = usage?.promptTokenCount()?.get() ?: 0
         val outputTokens = usage?.candidatesTokenCount()?.get() ?: 0
@@ -45,11 +44,11 @@ abstract class GeminiProcessClient(
         val jsonElement = Json.parseToJsonElement(outputText)
 
         return if (jsonElement is JsonObject) {
-            GeminiResult(
-                json = jsonElement,
+            LLMProcessResult(
+                resultText = jsonElement.toString(),
                 inputTokens = inputTokens,
                 outputTokens = outputTokens,
-                promptFileName = getFullPromptFileName()
+                promptName = getFullPromptFileName()
             )
         } else {
             throw GeminiIntegrationException(
@@ -59,7 +58,7 @@ abstract class GeminiProcessClient(
                 Retorno da LLM: 
                 $outputText
                 """".trimMargin(),
-                statusCode = HttpStatusCode.BadGateway,
+                statusCode = 502,
                 errorCode = GeminiErrorCodes.GOOGLE_GEMINI_MALFORMED_RESULT,
                 serviceName = this.javaClass.simpleName
             )

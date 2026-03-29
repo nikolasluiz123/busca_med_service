@@ -22,4 +22,8 @@ abstract class BaseLLMExecutionHistoryRepositoryImpl(
     override suspend fun findHistorySince(startDate: Instant): List<LLMExecutionHistory> {
         return dataSource.findHistorySince(startDate).map { it.toDomain() }
     }
+
+    override suspend fun findHistoryById(historyId: String): LLMExecutionHistory? {
+        return dataSource.findHistoryById(historyId)?.toDomain()
+    }
 }

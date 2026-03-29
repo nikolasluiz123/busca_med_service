@@ -4,7 +4,6 @@ import br.com.buscamed.api.v1.anvisa.AnvisaController
 import br.com.buscamed.api.v1.pillpack.PillPackController
 import br.com.buscamed.api.v1.prescription.PrescriptionController
 import br.com.buscamed.core.config.properties.GeminiConfig
-import br.com.buscamed.data.client.anvisa.AnvisaIntegrationClient
 import br.com.buscamed.data.client.anvisa.AnvisaIntegrationKtorClient
 import br.com.buscamed.data.client.core.HttpClientFactory
 import br.com.buscamed.data.client.gemini.image.GeminiMedicalPrescriptionImageProcessClient
@@ -30,6 +29,7 @@ import br.com.buscamed.domain.parser.AnvisaCsvParser
 import br.com.buscamed.domain.repository.AnvisaMedicationRepository
 import br.com.buscamed.domain.repository.LLMExecutionHistoryRepository
 import br.com.buscamed.domain.repository.SystemProcessControlRepository
+import br.com.buscamed.domain.service.AnvisaIntegrationService
 import br.com.buscamed.domain.usecase.*
 import com.google.cloud.firestore.Firestore
 import com.google.cloud.firestore.FirestoreOptions
@@ -57,6 +57,13 @@ object DiQualifiers {
     const val UC_DOWNLOAD_PILL_PACK_IMAGE = "DownloadPillPackImageUseCase"
 
     const val HTTP_CLIENT_ANVISA = "HttpClientAnvisa"
+
+     const val UC_PROCESS_IMAGE_PRESCRIPTION = "ProcessImagePrescriptionUseCase"
+     const val UC_PROCESS_IMAGE_PILL_PACK = "ProcessImagePillPackUseCase"
+     const val UC_PROCESS_TEXT_PRESCRIPTION = "ProcessTextPrescriptionUseCase"
+     const val UC_PROCESS_TEXT_PILL_PACK = "ProcessTextPillPackUseCase"
+     const val UC_GET_HISTORY_PRESCRIPTION = "GetHistoryPrescriptionUseCase"
+     const val UC_GET_HISTORY_PILL_PACK = "GetHistoryPillPackUseCase"
 }
 
 /**
@@ -155,69 +162,69 @@ fun appModule(environment: ApplicationEnvironment) = module {
     single { GeminiMedicalPrescriptionTextProcessClient(config = get()) }
     single { GeminiPillPackTextProcessClient(config = get()) }
 
-    single<AnvisaIntegrationClient> {
+    single<AnvisaIntegrationService> {
         AnvisaIntegrationKtorClient(httpClient = get(named(DiQualifiers.HTTP_CLIENT_ANVISA)))
     }
 
     single<AnvisaCsvParser> { ApacheCommonsAnvisaCsvParser() }
 
-    factory {
-        ProcessMedicalPrescriptionImageUseCase(
-            executionHistoryRepository = get(named(DiQualifiers.REPO_MEDICAL_PRESCRIPTION)),
-            geminiClient = get(),
-            storageClient = get()
-        )
-    }
-
-    factory {
-        ProcessPillPackImageUseCase(
-            executionHistoryRepository = get(named(DiQualifiers.REPO_PILL_PACK)),
-            geminiClient = get(),
-            storageClient = get()
-        )
-    }
-
-    factory {
-        ProcessMedicalPrescriptionTextUseCase(
-            executionHistoryRepository = get(named(DiQualifiers.REPO_MEDICAL_PRESCRIPTION)),
-            geminiClient = get()
-        )
-    }
-
-    factory {
-        ProcessPillPackTextUseCase(
-            executionHistoryRepository = get(named(DiQualifiers.REPO_PILL_PACK)),
-            geminiClient = get()
-        )
-    }
-
-    factory {
-        GetMedicalPrescriptionHistoryUseCase(
-            repository = get(named(DiQualifiers.REPO_MEDICAL_PRESCRIPTION))
-        )
-    }
-
-    factory {
-        GetPillPackHistoryUseCase(
-            repository = get(named(DiQualifiers.REPO_PILL_PACK))
-        )
-    }
-
-    factory { GetContentTypeByExtensionUseCase() }
-
     factory(named(DiQualifiers.UC_DOWNLOAD_MEDICAL_PRESCRIPTION_IMAGE)) {
         DownloadImageUseCase(
-            executionHistoryDataSource = get(named(DiQualifiers.DS_MEDICAL_PRESCRIPTION)),
-            storageClient = get<MedicalPrescriptionGoogleStorageClient>(),
-            getContentTypeByExtensionUseCase = get()
+            repository = get(named(DiQualifiers.REPO_MEDICAL_PRESCRIPTION)),
+            storageService = get<MedicalPrescriptionGoogleStorageClient>(),
+            getSupportedImageFormatUseCase = get()
         )
     }
 
     factory(named(DiQualifiers.UC_DOWNLOAD_PILL_PACK_IMAGE)) {
         DownloadImageUseCase(
-            executionHistoryDataSource = get(named(DiQualifiers.DS_PILL_PACK)),
-            storageClient = get<PillPackGoogleStorageClient>(),
-            getContentTypeByExtensionUseCase = get()
+            repository = get(named(DiQualifiers.REPO_PILL_PACK)),
+            storageService = get<PillPackGoogleStorageClient>(),
+            getSupportedImageFormatUseCase = get()
+        )
+    }
+
+    factory { GetSupportedImageFormatUseCase() }
+
+    factory(named(DiQualifiers.UC_PROCESS_IMAGE_PRESCRIPTION)) {
+        ProcessImageUseCase(
+            executionHistoryRepository = get(named(DiQualifiers.REPO_MEDICAL_PRESCRIPTION)),
+            llmProcessService = get<GeminiMedicalPrescriptionImageProcessClient>(),
+            storageService = get<MedicalPrescriptionGoogleStorageClient>()
+        )
+    }
+
+    factory(named(DiQualifiers.UC_PROCESS_TEXT_PRESCRIPTION)) {
+        ProcessTextUseCase(
+            executionHistoryRepository = get(named(DiQualifiers.REPO_MEDICAL_PRESCRIPTION)),
+            llmProcessService = get<GeminiMedicalPrescriptionTextProcessClient>()
+        )
+    }
+
+    factory(named(DiQualifiers.UC_GET_HISTORY_PRESCRIPTION)) {
+        GetLLMExecutionHistoryUseCase(
+            repository = get(named(DiQualifiers.REPO_MEDICAL_PRESCRIPTION))
+        )
+    }
+
+    factory(named(DiQualifiers.UC_PROCESS_IMAGE_PILL_PACK)) {
+        ProcessImageUseCase(
+            executionHistoryRepository = get(named(DiQualifiers.REPO_PILL_PACK)),
+            llmProcessService = get<GeminiPillPackImageProcessClient>(),
+            storageService = get<PillPackGoogleStorageClient>()
+        )
+    }
+
+    factory(named(DiQualifiers.UC_PROCESS_TEXT_PILL_PACK)) {
+        ProcessTextUseCase(
+            executionHistoryRepository = get(named(DiQualifiers.REPO_PILL_PACK)),
+            llmProcessService = get<GeminiPillPackTextProcessClient>()
+        )
+    }
+
+    factory(named(DiQualifiers.UC_GET_HISTORY_PILL_PACK)) {
+        GetLLMExecutionHistoryUseCase(
+            repository = get(named(DiQualifiers.REPO_PILL_PACK))
         )
     }
 
@@ -241,10 +248,10 @@ fun appModule(environment: ApplicationEnvironment) = module {
 
     factory {
         ImportAnvisaInformationUseCase(
-            integrationClient = get(),
+            integrationService = get(),
             csvParser = get(),
             medicationRepository = get(),
-            storageClient = get(),
+            storageService = get(),
             processControlRepository = get()
         )
     }

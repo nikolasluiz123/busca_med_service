@@ -1,16 +1,17 @@
 package br.com.buscamed.data.client.gemini.core.client
 
 import br.com.buscamed.core.config.properties.GeminiConfig
-import br.com.buscamed.data.client.gemini.core.result.GeminiResult
+import br.com.buscamed.domain.model.LLMProcessResult
+import br.com.buscamed.domain.service.LLMImageProcessService
 import com.google.genai.types.Blob
 import com.google.genai.types.Content
 import com.google.genai.types.Part
 
-abstract class GeminiImageProcessClient(config: GeminiConfig): GeminiProcessClient(config) {
+abstract class GeminiImageProcessClient(config: GeminiConfig): GeminiProcessClient(config), LLMImageProcessService {
     override val modelId: String = "gemini-2.5-flash-lite"
     final override val promptsDirectoryName: String = "gemini/image_process"
 
-    fun process(imageBytes: ByteArray, mimeType: String = "image/jpeg"): GeminiResult {
+    override suspend fun process(imageBytes: ByteArray, mimeType: String): LLMProcessResult {
         val client = getClient()
         val instruction = getSystemInstruction()
         val config = getGenerationConfig()

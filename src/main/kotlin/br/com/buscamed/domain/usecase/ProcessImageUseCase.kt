@@ -1,26 +1,28 @@
 package br.com.buscamed.domain.usecase
 
-import br.com.buscamed.data.client.gemini.core.client.GeminiImageProcessClient
-import br.com.buscamed.data.client.storage.google.core.ImagesGoogleStorageClient
 import br.com.buscamed.domain.exceptions.BusinessException
 import br.com.buscamed.domain.model.LLMExecutionHistory
 import br.com.buscamed.domain.repository.LLMExecutionHistoryRepository
+import br.com.buscamed.domain.service.ImageStorageService
+import br.com.buscamed.domain.service.LLMImageProcessService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonObject
 import java.time.Instant
 
-abstract class BaseProcessImageUseCase(
+/**
+ * Caso de uso universal para processamento de imagens e extração de dados estruturados.
+ */
+class ProcessImageUseCase(
     private val executionHistoryRepository: LLMExecutionHistoryRepository,
-    private val geminiClient: GeminiImageProcessClient,
-    private val storageClient: ImagesGoogleStorageClient
+    private val llmProcessService: LLMImageProcessService,
+    private val storageService: ImageStorageService
 ) {
     private val uploadImageScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    suspend operator fun invoke(imageBytes: ByteArray?, mimeType: String?): JsonObject = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(imageBytes: ByteArray?, mimeType: String?): String = withContext(Dispatchers.IO) {
         if (imageBytes == null) {
             throw BusinessException("É obrigatório informar uma imagem para processamento")
         }
@@ -33,17 +35,17 @@ abstract class BaseProcessImageUseCase(
         val executionStart = Instant.now()
         var inputTokens = 0
         var outputTokens = 0
-        var resultJson: JsonObject? = null
+        var resultText = "{}"
         var prompt = ""
 
         try {
-            val geminiResult = geminiClient.process(imageBytes, mimeType)
-            inputTokens = geminiResult.inputTokens
-            outputTokens = geminiResult.outputTokens
-            resultJson = geminiResult.json
-            prompt = geminiResult.promptFileName
+            val llmResult = llmProcessService.process(imageBytes, mimeType)
+            inputTokens = llmResult.inputTokens
+            outputTokens = llmResult.outputTokens
+            resultText = llmResult.resultText
+            prompt = llmResult.promptName
 
-            resultJson
+            resultText
         } catch (e: Exception) {
             executionSuccess = false
             throw e
@@ -51,7 +53,7 @@ abstract class BaseProcessImageUseCase(
             val history = LLMExecutionHistory(
                 inputTokens = inputTokens,
                 outputTokens = outputTokens,
-                result = resultJson?.toString(),
+                result = resultText,
                 success = executionSuccess,
                 startDate = executionStart,
                 endDate = Instant.now(),
@@ -61,7 +63,7 @@ abstract class BaseProcessImageUseCase(
             val historyId = executionHistoryRepository.save(history)
 
             uploadImageScope.launch {
-                val path = storageClient.upload(imageBytes, mimeType)
+                val path = storageService.upload(imageBytes, mimeType)
                 executionHistoryRepository.updateImageStoragePath(historyId, path)
             }
         }
