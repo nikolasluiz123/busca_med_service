@@ -34,12 +34,15 @@ abstract class BaseProcessImageUseCase(
         var inputTokens = 0
         var outputTokens = 0
         var resultJson: JsonObject? = null
+        var prompt = ""
 
         try {
             val geminiResult = geminiClient.process(imageBytes, mimeType)
             inputTokens = geminiResult.inputTokens
             outputTokens = geminiResult.outputTokens
             resultJson = geminiResult.json
+            prompt = geminiResult.promptFileName
+
             resultJson
         } catch (e: Exception) {
             executionSuccess = false
@@ -52,6 +55,7 @@ abstract class BaseProcessImageUseCase(
                 success = executionSuccess,
                 startDate = executionStart,
                 endDate = Instant.now(),
+                prompt = prompt
             )
 
             val historyId = executionHistoryRepository.save(history)

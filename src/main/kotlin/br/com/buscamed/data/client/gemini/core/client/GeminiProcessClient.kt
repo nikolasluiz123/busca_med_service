@@ -45,7 +45,12 @@ abstract class GeminiProcessClient(environment: ApplicationEnvironment): LLMProc
         val jsonElement = Json.parseToJsonElement(outputText)
 
         return if (jsonElement is JsonObject) {
-            GeminiResult(jsonElement, inputTokens, outputTokens)
+            GeminiResult(
+                json = jsonElement,
+                inputTokens = inputTokens,
+                outputTokens = outputTokens,
+                promptFileName = getFullPromptFileName()
+            )
         } else {
             throw GeminiIntegrationException(
                 userMessage = getUserFailureGenericMessage(),

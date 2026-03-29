@@ -13,7 +13,8 @@ fun LLMExecutionHistory.toDocument(): LLMExecutionHistoryDocument {
         success = success,
         startDate = startDate,
         endDate = endDate,
-        storageImagePath = storageImagePath
+        storageImagePath = storageImagePath,
+        prompt = prompt
     )
 }
 
@@ -26,7 +27,8 @@ fun LLMExecutionHistoryDocument.toDomain(): LLMExecutionHistory {
         success = success,
         startDate = startDate,
         endDate = endDate,
-        storageImagePath = storageImagePath
+        storageImagePath = storageImagePath,
+        prompt = prompt
     )
 }
 
@@ -39,6 +41,7 @@ fun LLMExecutionHistory.toDTO(): LLMExecutionHistoryResponseDTO {
         success = success,
         startDate = startDate.toString(),
         endDate = endDate.toString(),
-        storageImagePath = storageImagePath
+        storageImagePath = storageImagePath,
+        prompt = prompt
     )
 }

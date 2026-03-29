@@ -23,5 +23,6 @@ data class LLMExecutionHistoryResponseDTO(
     val success: Boolean,
     val startDate: String,
     val endDate: String,
-    val storageImagePath: String?
+    val storageImagePath: String?,
+    val prompt: String
 )

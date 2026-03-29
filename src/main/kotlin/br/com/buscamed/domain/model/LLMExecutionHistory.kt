@@ -10,5 +10,6 @@ data class LLMExecutionHistory(
     val startDate: Instant,
     val endDate: Instant,
     val id: String? = null,
-    val storageImagePath: String? = null
+    val storageImagePath: String? = null,
+    val prompt: String = ""
 )

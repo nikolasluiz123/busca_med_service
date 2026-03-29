@@ -17,5 +17,6 @@ data class LLMExecutionHistoryDocument(
     val startDate: Instant = Instant.now(),
     @Serializable(with = InstantSerializer::class)
     val endDate: Instant = Instant.now(),
-    val storageImagePath: String? = null
+    val storageImagePath: String? = null,
+    val prompt: String = ""
 ) : FirestoreDocument
