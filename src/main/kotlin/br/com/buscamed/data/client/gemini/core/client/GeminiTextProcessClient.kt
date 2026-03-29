@@ -1,9 +1,9 @@
 package br.com.buscamed.data.client.gemini.core.client
 
+import br.com.buscamed.core.config.properties.GeminiConfig
 import br.com.buscamed.data.client.gemini.core.result.GeminiResult
-import io.ktor.server.application.ApplicationEnvironment
 
-abstract class GeminiTextProcessClient(environment: ApplicationEnvironment): GeminiProcessClient(environment) {
+abstract class GeminiTextProcessClient(config: GeminiConfig): GeminiProcessClient(config) {
     override val modelId: String = "gemini-2.5-flash-lite"
     final override val promptsDirectoryName: String = "gemini/text_process"
 

@@ -3,6 +3,7 @@ package br.com.buscamed.core.config
 import br.com.buscamed.api.v1.anvisa.AnvisaController
 import br.com.buscamed.api.v1.pillpack.PillPackController
 import br.com.buscamed.api.v1.prescription.PrescriptionController
+import br.com.buscamed.core.config.properties.GeminiConfig
 import br.com.buscamed.data.client.anvisa.AnvisaIntegrationClient
 import br.com.buscamed.data.client.anvisa.AnvisaIntegrationKtorClient
 import br.com.buscamed.data.client.core.HttpClientFactory
@@ -29,16 +30,12 @@ import br.com.buscamed.domain.parser.AnvisaCsvParser
 import br.com.buscamed.domain.repository.AnvisaMedicationRepository
 import br.com.buscamed.domain.repository.LLMExecutionHistoryRepository
 import br.com.buscamed.domain.repository.SystemProcessControlRepository
-import br.com.buscamed.domain.usecase.DownloadImageUseCase
-import br.com.buscamed.domain.usecase.GetContentTypeByExtensionUseCase
-import br.com.buscamed.domain.usecase.GetMedicalPrescriptionHistoryUseCase
-import br.com.buscamed.domain.usecase.GetPillPackHistoryUseCase
-import br.com.buscamed.domain.usecase.ImportAnvisaInformationUseCase
-import br.com.buscamed.domain.usecase.ProcessMedicalPrescriptionImageUseCase
-import br.com.buscamed.domain.usecase.ProcessMedicalPrescriptionTextUseCase
-import br.com.buscamed.domain.usecase.ProcessPillPackImageUseCase
-import br.com.buscamed.domain.usecase.ProcessPillPackTextUseCase
-import io.ktor.client.HttpClient
+import br.com.buscamed.domain.usecase.*
+import com.google.cloud.firestore.Firestore
+import com.google.cloud.firestore.FirestoreOptions
+import com.google.cloud.storage.Storage
+import com.google.cloud.storage.StorageOptions
+import io.ktor.client.*
 import io.ktor.server.application.*
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -55,9 +52,11 @@ object DiQualifiers {
 
     const val REPO_MEDICAL_PRESCRIPTION = "RepositoryMedicalPrescription"
     const val REPO_PILL_PACK = "RepositoryPillPack"
-    
+
     const val UC_DOWNLOAD_MEDICAL_PRESCRIPTION_IMAGE = "DownloadMedicalPrescriptionImageUseCase"
     const val UC_DOWNLOAD_PILL_PACK_IMAGE = "DownloadPillPackImageUseCase"
+
+    const val HTTP_CLIENT_ANVISA = "HttpClientAnvisa"
 }
 
 /**
@@ -80,12 +79,51 @@ fun Application.configureDI() {
  */
 fun appModule(environment: ApplicationEnvironment) = module {
 
+    single {
+        GeminiConfig(
+            projectId = environment.config.property("buscamed.gcp.project_id").getString(),
+            location = environment.config.property("buscamed.gcp.region").getString()
+        )
+    }
+
+    single<Firestore> {
+        val firestoreDbId = environment.config.propertyOrNull("buscamed.gcp.firestore.database_id")?.getString() ?: "dev-db"
+
+        FirestoreOptions.newBuilder()
+            .setDatabaseId(firestoreDbId)
+            .build()
+            .service
+    }
+
+    single<Storage> {
+        StorageOptions.getDefaultInstance().service
+    }
+
+    single<HttpClient> {
+        HttpClientFactory.createClient()
+    }
+
+    single<HttpClient>(named(DiQualifiers.HTTP_CLIENT_ANVISA)) {
+        HttpClientFactory.createClient(
+            connectTimeoutMillis = 300_000,
+            requestTimeoutMillis = 600_000
+        )
+    }
+
     factory<LLMExecutionHistoryDataSource>(named(DiQualifiers.DS_MEDICAL_PRESCRIPTION)) {
-        FirestoreMedicalPrescriptionExecutionHistoryDataSource()
+        FirestoreMedicalPrescriptionExecutionHistoryDataSource(db = get())
     }
 
     factory<LLMExecutionHistoryDataSource>(named(DiQualifiers.DS_PILL_PACK)) {
-        FirestorePillPackExecutionHistoryDataSource()
+        FirestorePillPackExecutionHistoryDataSource(db = get())
+    }
+
+    factory<AnvisaMedicationDataSource> {
+        FirestoreAnvisaMedicationDataSource(db = get())
+    }
+
+    factory<SystemProcessControlDataSource> {
+        FirestoreSystemProcessControlDataSource(db = get())
     }
 
     factory<LLMExecutionHistoryRepository>(named(DiQualifiers.REPO_MEDICAL_PRESCRIPTION)) {
@@ -100,36 +138,27 @@ fun appModule(environment: ApplicationEnvironment) = module {
         )
     }
 
-    factory<AnvisaMedicationDataSource> {
-        FirestoreAnvisaMedicationDataSource()
-    }
-
     factory<AnvisaMedicationRepository> {
-        AnvisaMedicationRepositoryImpl(
-            dataSource = get()
-        )
-    }
-
-    factory<SystemProcessControlDataSource> {
-        FirestoreSystemProcessControlDataSource()
+        AnvisaMedicationRepositoryImpl(dataSource = get())
     }
 
     factory<SystemProcessControlRepository> {
-        SystemProcessControlRepositoryImpl(
-            dataSource = get()
-        )
+        SystemProcessControlRepositoryImpl(dataSource = get())
     }
 
-    single { MedicalPrescriptionGoogleStorageClient() }
-    single { PillPackGoogleStorageClient() }
-    single { AnvisaCsvGoogleStorageClient() }
+    single { MedicalPrescriptionGoogleStorageClient(storage = get()) }
+    single { PillPackGoogleStorageClient(storage = get()) }
+    single { AnvisaCsvGoogleStorageClient(storage = get()) }
 
-    single { GeminiMedicalPrescriptionImageProcessClient(environment) }
-    single { GeminiPillPackImageProcessClient(environment) }
-    single { GeminiMedicalPrescriptionTextProcessClient(environment) }
-    single { GeminiPillPackTextProcessClient(environment) }
+    single { GeminiMedicalPrescriptionImageProcessClient(config = get()) }
+    single { GeminiPillPackImageProcessClient(config = get()) }
+    single { GeminiMedicalPrescriptionTextProcessClient(config = get()) }
+    single { GeminiPillPackTextProcessClient(config = get()) }
 
-    single<AnvisaIntegrationClient> { AnvisaIntegrationKtorClient() }
+    single<AnvisaIntegrationClient> {
+        AnvisaIntegrationKtorClient(httpClient = get(named(DiQualifiers.HTTP_CLIENT_ANVISA)))
+    }
+
     single<AnvisaCsvParser> { ApacheCommonsAnvisaCsvParser() }
 
     factory {

@@ -4,13 +4,11 @@ import br.com.buscamed.data.datasource.core.BaseFirestoreDataSource
 import br.com.buscamed.data.datasource.core.FirestoreSchema.ANVISA_MEDICATIONS_COLLECTION
 import br.com.buscamed.data.datasource.interfaces.AnvisaMedicationDataSource
 import br.com.buscamed.data.document.AnvisaMedicationDocument
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.google.cloud.firestore.Firestore
 
-/**
- * Implementação de [AnvisaMedicationDataSource] utilizando Firestore.
- */
-class FirestoreAnvisaMedicationDataSource : BaseFirestoreDataSource(), AnvisaMedicationDataSource {
+class FirestoreAnvisaMedicationDataSource(
+    db: Firestore
+) : BaseFirestoreDataSource(db), AnvisaMedicationDataSource {
 
     override suspend fun saveAll(medications: List<AnvisaMedicationDocument>) {
         val collection = db.collection(ANVISA_MEDICATIONS_COLLECTION)

@@ -2,7 +2,6 @@ package br.com.buscamed.data.client.anvisa
 
 import br.com.buscamed.data.client.anvisa.dto.AnvisaDatasetResponseDTO
 import br.com.buscamed.data.client.anvisa.exception.AnvisaIntegrationException
-import br.com.buscamed.data.client.core.HttpClientFactory
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -10,17 +9,9 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import org.slf4j.LoggerFactory
 
-/**
- * Implementação de [AnvisaIntegrationClient] utilizando Ktor HTTP Client.
- *
- * @property httpClient Instância configurada do Ktor HttpClient.
- */
-class AnvisaIntegrationKtorClient : AnvisaIntegrationClient {
-
-    private val httpClient: HttpClient = HttpClientFactory.createClient(
-        connectTimeoutMillis = 300_000,
-        requestTimeoutMillis = 600_000
-    )
+class AnvisaIntegrationKtorClient(
+    private val httpClient: HttpClient
+) : AnvisaIntegrationClient {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val datasetUrl = "https://dados.gov.br/api/publico/conjuntos-dados/preco-de-medicamentos-no-brasil-consumidor"

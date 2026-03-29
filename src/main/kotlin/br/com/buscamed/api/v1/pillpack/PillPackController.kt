@@ -2,16 +2,15 @@ package br.com.buscamed.api.v1.pillpack
 
 import br.com.buscamed.api.v1.dto.request.TextRequestDTO
 import br.com.buscamed.api.v1.extensions.extractImageMultipart
-import br.com.buscamed.data.mapper.toDTO
+import br.com.buscamed.api.v1.mapper.toDTO
 import br.com.buscamed.domain.usecase.DownloadImageUseCase
 import br.com.buscamed.domain.usecase.GetPillPackHistoryUseCase
 import br.com.buscamed.domain.usecase.ProcessPillPackImageUseCase
 import br.com.buscamed.domain.usecase.ProcessPillPackTextUseCase
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
-import io.ktor.server.response.respondBytes
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
 import java.time.Instant
 import java.time.format.DateTimeParseException
 
@@ -67,7 +66,7 @@ class PillPackController(
 
         val startDate = try {
             startDateParam?.let { Instant.parse(it) } ?: Instant.EPOCH
-        } catch (e: DateTimeParseException) {
+        } catch (_: DateTimeParseException) {
             call.respond(HttpStatusCode.BadRequest, "O formato da data 'startDate' é inválido. Utilize o padrão ISO-8601.")
             return
         }

@@ -1,27 +1,27 @@
 package br.com.buscamed.data.client.gemini.core.client
 
-import com.google.genai.Client
-import com.google.genai.types.GenerateContentConfig
-import com.google.genai.types.GenerateContentResponse
+import br.com.buscamed.core.config.properties.GeminiConfig
 import br.com.buscamed.data.client.core.llm.LLMProcessClient
 import br.com.buscamed.data.client.gemini.core.exception.GeminiErrorCodes
 import br.com.buscamed.data.client.gemini.core.exception.GeminiIntegrationException
 import br.com.buscamed.data.client.gemini.core.result.GeminiResult
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationEnvironment
+import com.google.genai.Client
+import com.google.genai.types.GenerateContentConfig
+import com.google.genai.types.GenerateContentResponse
+import io.ktor.http.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
-abstract class GeminiProcessClient(environment: ApplicationEnvironment): LLMProcessClient() {
-    protected val projectId = environment.config.property("buscamed.gcp.project_id").getString()
-    protected val location = environment.config.property("buscamed.gcp.region").getString()
+abstract class GeminiProcessClient(
+    private val config: GeminiConfig
+): LLMProcessClient() {
 
     protected abstract fun getUserFailureGenericMessage(): String
 
     protected fun getClient(): Client {
         return Client.builder()
-            .project(projectId)
-            .location(location)
+            .project(config.projectId)
+            .location(config.location)
             .vertexAI(true)
             .build()
     }

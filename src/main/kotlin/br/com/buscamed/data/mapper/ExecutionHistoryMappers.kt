@@ -1,6 +1,5 @@
 package br.com.buscamed.data.mapper
 
-import br.com.buscamed.api.v1.dto.response.LLMExecutionHistoryResponseDTO
 import br.com.buscamed.data.document.LLMExecutionHistoryDocument
 import br.com.buscamed.domain.model.LLMExecutionHistory
 
@@ -27,20 +26,6 @@ fun LLMExecutionHistoryDocument.toDomain(): LLMExecutionHistory {
         success = success,
         startDate = startDate,
         endDate = endDate,
-        storageImagePath = storageImagePath,
-        prompt = prompt
-    )
-}
-
-fun LLMExecutionHistory.toDTO(): LLMExecutionHistoryResponseDTO {
-    return LLMExecutionHistoryResponseDTO(
-        id = id,
-        inputTokens = inputTokens,
-        outputTokens = outputTokens,
-        result = result,
-        success = success,
-        startDate = startDate.toString(),
-        endDate = endDate.toString(),
         storageImagePath = storageImagePath,
         prompt = prompt
     )

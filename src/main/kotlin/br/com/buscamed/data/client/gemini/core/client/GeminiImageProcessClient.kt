@@ -1,12 +1,12 @@
 package br.com.buscamed.data.client.gemini.core.client
 
+import br.com.buscamed.core.config.properties.GeminiConfig
 import br.com.buscamed.data.client.gemini.core.result.GeminiResult
 import com.google.genai.types.Blob
 import com.google.genai.types.Content
 import com.google.genai.types.Part
-import io.ktor.server.application.ApplicationEnvironment
 
-abstract class GeminiImageProcessClient(environment: ApplicationEnvironment): GeminiProcessClient(environment) {
+abstract class GeminiImageProcessClient(config: GeminiConfig): GeminiProcessClient(config) {
     override val modelId: String = "gemini-2.5-flash-lite"
     final override val promptsDirectoryName: String = "gemini/image_process"
 

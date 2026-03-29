@@ -3,8 +3,9 @@ package br.com.buscamed.data.client.storage.google.core
 import br.com.buscamed.core.utils.ImageFileUtils
 import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.BlobInfo
+import com.google.cloud.storage.Storage
 
-abstract class ImagesGoogleStorageClient: GoogleStorageClient() {
+abstract class ImagesGoogleStorageClient(storage: Storage): GoogleStorageClient(storage) {
 
     override val bucketName: String = "gemini_processed_images"
 

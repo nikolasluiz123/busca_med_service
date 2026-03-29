@@ -1,9 +1,9 @@
 package br.com.buscamed.data.client.gemini.image
 
+import br.com.buscamed.core.config.properties.GeminiConfig
 import br.com.buscamed.data.client.gemini.core.client.GeminiImageProcessClient
-import io.ktor.server.application.ApplicationEnvironment
 
-class GeminiPillPackImageProcessClient(environment: ApplicationEnvironment): GeminiImageProcessClient(environment) {
+class GeminiPillPackImageProcessClient(config: GeminiConfig): GeminiImageProcessClient(config) {
     override val promptVersion: String = "v1"
     override val promptFileName: String = "pill_pack"
 

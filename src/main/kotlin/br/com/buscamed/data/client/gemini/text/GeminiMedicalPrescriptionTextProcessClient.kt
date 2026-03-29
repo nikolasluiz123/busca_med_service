@@ -1,9 +1,9 @@
 package br.com.buscamed.data.client.gemini.text
 
+import br.com.buscamed.core.config.properties.GeminiConfig
 import br.com.buscamed.data.client.gemini.core.client.GeminiTextProcessClient
-import io.ktor.server.application.ApplicationEnvironment
 
-class GeminiMedicalPrescriptionTextProcessClient(environment: ApplicationEnvironment): GeminiTextProcessClient(environment) {
+class GeminiMedicalPrescriptionTextProcessClient(config: GeminiConfig): GeminiTextProcessClient(config) {
     override val promptVersion: String = "v1"
     override val promptFileName: String = "medical_prescription"
 
