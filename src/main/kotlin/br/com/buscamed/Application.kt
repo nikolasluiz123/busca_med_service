@@ -1,5 +1,6 @@
 package br.com.buscamed
 
+import br.com.buscamed.core.config.configureCORS
 import br.com.buscamed.core.config.configureDI
 import br.com.buscamed.core.config.configureRouting
 import br.com.buscamed.core.config.exception.configureStatusPages
@@ -18,7 +19,7 @@ fun Application.module() {
     configureSecurity()
     configureMonitoring()
     configureStatusPages()
-
+    configureCORS()
     configureRouting()
 
     log.info("Aplicação inicializada com sucesso.")
