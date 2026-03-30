@@ -1,4 +1,4 @@
-package br.com.buscamed.api.v1.extensions
+package br.com.buscamed.api.v1.extension
 
 import br.com.buscamed.api.v1.dto.request.ImageMultipartDTO
 import io.ktor.http.content.PartData

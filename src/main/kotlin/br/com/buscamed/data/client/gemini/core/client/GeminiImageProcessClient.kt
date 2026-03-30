@@ -7,6 +7,14 @@ import com.google.genai.types.Blob
 import com.google.genai.types.Content
 import com.google.genai.types.Part
 
+/**
+ * Cliente base para o processamento de imagens utilizando os modelos do Google Gemini.
+ *
+ * Implementa [LLMImageProcessService] com regras específicas para conversão dos bytes e
+ * envio do conteúdo ao modelo gerativo.
+ *
+ * @param config As propriedades de configuração para conexão com a API do Gemini.
+ */
 abstract class GeminiImageProcessClient(config: GeminiConfig): GeminiProcessClient(config), LLMImageProcessService {
     override val modelId: String = "gemini-2.5-flash-lite"
     final override val promptsDirectoryName: String = "gemini/image_process"

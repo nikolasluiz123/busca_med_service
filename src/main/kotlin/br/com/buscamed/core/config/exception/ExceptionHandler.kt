@@ -13,6 +13,14 @@ import io.ktor.server.auth.principal
 import io.ktor.server.request.path
 import org.slf4j.LoggerFactory
 
+/**
+ * Configura o tratamento global de exceções da aplicação Ktor utilizando o plugin [StatusPages].
+ *
+ * Mapeia exceções conhecidas (como [BuscaMedException] e suas derivadas) e exceções genéricas
+ * ([Throwable]) para respostas HTTP padronizadas utilizando o [ErrorResponseDTO].
+ * Além disso, realiza o logging estruturado dos erros, diferenciando erros de sistema (status >= 500)
+ * de erros de negócio (status < 500).
+ */
 fun Application.configureStatusPages() {
     val logger = LoggerFactory.getLogger("GlobalExceptionHandler")
 
@@ -60,6 +68,10 @@ fun Application.configureStatusPages() {
     }
 }
 
+/**
+ * Extrai a identificação do usuário logado a partir do token JWT para fins de logging.
+ * Retorna "Anonymous" se o usuário não estiver autenticado.
+ */
 private fun ApplicationCall.extractUserLogInfo(): String {
     val principal = this.principal<JWTPrincipal>()
     return principal?.payload?.subject ?: principal?.payload?.getClaim("uid")?.asString() ?: "Anonymous"

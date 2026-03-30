@@ -2,11 +2,19 @@ package br.com.buscamed.core.utils
 
 import br.com.buscamed.core.enumeration.SupportedImageFormat
 
+/**
+ * Utilitário contendo funções auxiliares para manipulação, validação e
+ * resolução de metadados de arquivos de imagem no sistema.
+ */
 object ImageFileUtils {
 
     /**
-     * Resolve o MimeType baseado na string fornecida ou na extensão do arquivo.
-     * Retorna null se não for possível determinar um formato suportado.
+     * Tenta determinar o Mime-Type canônico suportado, usando primeiro
+     * o mimetype fornecido e, caso falhe, recorrendo à extensão do arquivo.
+     *
+     * @param mimeType O Mime-Type original extraído do upload (pode ser impreciso).
+     * @param fileName O nome original do arquivo de upload.
+     * @return O Mime-Type canônico se o formato for suportado, ou `null` caso contrário.
      */
     fun resolveMimeType(mimeType: String?, fileName: String?): String? {
         val formatFromMime = SupportedImageFormat.fromMimeType(mimeType)
@@ -28,15 +36,21 @@ object ImageFileUtils {
     }
 
     /**
-     * Retorna a extensão padrão para um MimeType.
-     * Retorna null se o MimeType não for suportado.
+     * Retorna a extensão de arquivo principal associada a um determinado Mime-Type.
+     *
+     * @param mimeType O Mime-Type a ser consultado.
+     * @return A string da extensão (sem o ponto) ou `null` se não for suportado.
      */
     fun getExtensionFromMimeType(mimeType: String): String? {
         return SupportedImageFormat.fromMimeType(mimeType)?.extensions?.firstOrNull()
     }
 
     /**
-     * Verifica se o MimeType é suportado pelo sistema.
+     * Valida se um Mime-Type específico corresponde a um dos formatos de
+     * imagem configurados como suportados pela aplicação.
+     *
+     * @param mimeType A string de Mime-Type a ser validada.
+     * @return `true` se o Mime-Type for suportado, `false` caso contrário.
      */
     fun isSupported(mimeType: String?): Boolean {
         return SupportedImageFormat.fromMimeType(mimeType) != null

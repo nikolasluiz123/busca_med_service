@@ -9,7 +9,10 @@ import io.ktor.server.routing.route
 import org.koin.ktor.ext.inject
 
 /**
- * Configura os endpoints para o contexto de Prescrição Médica.
+ * Configura os endpoints e regras de roteamento para o contexto de Prescrição Médica.
+ *
+ * Utiliza o [PrescriptionController] para tratar as requisições e aplica os
+ * mecanismos de autenticação (Firebase e Google OIDC) para proteger os recursos.
  */
 fun Route.prescriptionRoutes() {
     val controller: PrescriptionController by inject()

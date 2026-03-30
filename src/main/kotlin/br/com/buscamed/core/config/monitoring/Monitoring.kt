@@ -18,6 +18,16 @@ import org.slf4j.event.Level
  */
 private val RequestStartTimeKey = AttributeKey<Long>("RequestStartTime")
 
+/**
+ * Configura o monitoramento e logging das requisições HTTP da aplicação Ktor.
+ *
+ * Utiliza o plugin [CallLogging] para registrar detalhes de cada chamada, como método, path,
+ * status HTTP, tempo de processamento e dados do usuário (se autenticado). Permite ignorar
+ * caminhos específicos através do [MonitoringConfig]. Também intercepta a requisição no estágio
+ * [ApplicationCallPipeline.Monitoring] para medir o tempo de resposta com precisão.
+ *
+ * @param config Configurações adicionais para o comportamento do log (rotas ignoradas, etc).
+ */
 fun Application.configureMonitoring(
     config: MonitoringConfig = MonitoringConfig()
 ) {
@@ -59,7 +69,7 @@ fun Application.configureMonitoring(
 }
 
 /**
- * Calcula o tempo decorrido desde o início da requisição até o momento do log.
+ * Calcula o tempo decorrido desde o início da requisição até o momento da formatação do log.
  */
 private fun ApplicationCall.processingTimeMillis(): Long {
     val startTime = this.attributes.getOrNull(RequestStartTimeKey) ?: System.currentTimeMillis()

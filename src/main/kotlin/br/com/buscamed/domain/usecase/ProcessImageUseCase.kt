@@ -13,7 +13,15 @@ import kotlinx.coroutines.withContext
 import java.time.Instant
 
 /**
- * Caso de uso universal para processamento de imagens e extração de dados estruturados.
+ * Caso de uso universal para processamento de imagens e extração de dados estruturados utilizando LLMs.
+ *
+ * Este caso de uso coordena a chamada para o serviço de processamento de imagem, registra
+ * o histórico de execução (incluindo sucesso/falha e métricas de tokens) e realiza
+ * o upload assíncrono da imagem original para o storage.
+ *
+ * @property executionHistoryRepository O repositório para salvar o histórico da execução.
+ * @property llmProcessService O serviço de LLM responsável pelo processamento da imagem.
+ * @property storageService O serviço de armazenamento para fazer o upload da imagem.
  */
 class ProcessImageUseCase(
     private val executionHistoryRepository: LLMExecutionHistoryRepository,
@@ -22,6 +30,14 @@ class ProcessImageUseCase(
 ) {
     private val uploadImageScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    /**
+     * Executa o processo de extração de dados da imagem.
+     *
+     * @param imageBytes O conteúdo da imagem em array de bytes.
+     * @param mimeType O tipo MIME da imagem.
+     * @return O resultado processado pela LLM em formato de string JSON.
+     * @throws BusinessException Se os bytes da imagem ou o tipo MIME forem nulos.
+     */
     suspend operator fun invoke(imageBytes: ByteArray?, mimeType: String?): String = withContext(Dispatchers.IO) {
         if (imageBytes == null) {
             throw BusinessException("É obrigatório informar uma imagem para processamento")

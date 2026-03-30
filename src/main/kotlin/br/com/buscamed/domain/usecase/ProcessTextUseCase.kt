@@ -8,13 +8,26 @@ import kotlinx.coroutines.withContext
 import java.time.Instant
 
 /**
- * Caso de uso universal para extração estruturada a partir de texto base.
+ * Caso de uso universal para extração de dados estruturados a partir de texto base utilizando LLMs.
+ *
+ * Este caso de uso invoca o serviço de processamento de texto e registra o histórico
+ * da execução no banco de dados, incluindo métricas de tokens e o status de sucesso.
+ *
+ * @property executionHistoryRepository O repositório para salvar o histórico da execução.
+ * @property llmProcessService O serviço responsável pela comunicação com o modelo de linguagem.
  */
 class ProcessTextUseCase(
     private val executionHistoryRepository: LLMExecutionHistoryRepository,
     private val llmProcessService: LLMTextProcessService
 ) {
 
+    /**
+     * Executa o processo de extração de dados do texto.
+     *
+     * @param text O texto bruto a ser processado pela LLM.
+     * @return O resultado processado pela LLM em formato de string JSON.
+     * @throws Exception Se ocorrer algum erro durante a comunicação com o serviço da LLM.
+     */
     suspend operator fun invoke(text: String): String = withContext(Dispatchers.IO) {
         var executionSuccess = true
         val executionStart = Instant.now()

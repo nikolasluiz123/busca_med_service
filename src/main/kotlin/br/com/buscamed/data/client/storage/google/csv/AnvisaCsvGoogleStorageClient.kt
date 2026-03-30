@@ -6,6 +6,12 @@ import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.BlobInfo
 import com.google.cloud.storage.Storage
 
+/**
+ * Cliente responsável pela interface com o bucket de arquivos CSV da base de
+ * medicamentos da ANVISA no Google Cloud Storage.
+ *
+ * @param storage A instância do serviço de Storage do Google Cloud.
+ */
 class AnvisaCsvGoogleStorageClient(storage: Storage) : GoogleStorageClient(storage), CsvStorageService {
 
     override val bucketName: String = "anvisa_csv_files"

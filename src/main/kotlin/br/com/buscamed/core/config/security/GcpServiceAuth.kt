@@ -8,7 +8,8 @@ object GcpServiceAuth {
 
     /**
      * Gera um ID Token OIDC para autenticação entre serviços.
-     * * @param audience A URL do serviço destino.
+     *
+     * @param audience A URL do serviço destino.
      * @return O token JWT em formato String.
      * @throws br.com.buscamed.core.config.security.exeption.GcpAuthException.InvalidCredentialsType Se a credencial do ambiente não suportar tokens ID.
      * @throws java.io.IOException Se houver erro de rede ao contactar o servidor de metadados.

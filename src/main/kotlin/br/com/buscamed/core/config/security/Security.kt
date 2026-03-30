@@ -5,6 +5,13 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.jwt.jwt
 
+/**
+ * Configura os provedores de autenticação (Security) da aplicação Ktor.
+ *
+ * Lê as variáveis de ambiente necessárias e inicializa as estratégias de autenticação
+ * baseadas em JWT, suportando tanto usuários via Firebase Auth quanto
+ * comunicação service-to-service via Google OIDC.
+ */
 fun Application.configureSecurity() {
     val projectId = environment.config.property("buscamed.gcp.project_id").getString()
     val serviceAudience = environment.config.propertyOrNull("buscamed.gcp.service_audience")?.getString() ?: projectId
@@ -22,6 +29,15 @@ fun Application.configureSecurity() {
     configureSecurityStrategies(firebaseStrategy, googleOidcStrategy)
 }
 
+/**
+ * Instala o plugin de Autenticação do Ktor e registra as estratégias fornecidas.
+ *
+ * Cada estratégia configura o seu próprio provedor de chaves (JWK Provider) com
+ * regras de cache e rate limit específicas, além de definir os validadores de
+ * audience e issuer apropriados.
+ *
+ * @param strategies Uma ou mais implementações de [AuthStrategy] a serem registradas.
+ */
 private fun Application.configureSecurityStrategies(vararg strategies: AuthStrategy) {
     install(Authentication) {
         strategies.forEach { strategy ->

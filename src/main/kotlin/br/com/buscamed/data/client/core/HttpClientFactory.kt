@@ -10,15 +10,19 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
+/**
+ * Factory utilitária para criação de clientes HTTP padronizados usando o Ktor com CIO Engine.
+ */
 object HttpClientFactory {
 
     /**
      * Cria um HttpClient configurado com Engine CIO, ContentNegotiation e Timeouts.
      *
-     * @param jsonInstance Instância do Json configurada (padrão: DefaultSmartBuyJson).
+     * @param jsonInstance Instância do Json configurada (padrão: DefaultJson).
      * @param requestTimeoutMillis Timeout total da requisição (padrão: 10s).
      * @param connectTimeoutMillis Timeout de conexão (padrão: 5s).
      * @param extraConfig Bloco para configurações adicionais do Ktor Client.
+     * @return Uma instância configurada de [HttpClient].
      */
     fun createClient(
         jsonInstance: Json = DefaultJson,

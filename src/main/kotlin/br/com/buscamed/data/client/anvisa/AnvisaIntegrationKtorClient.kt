@@ -10,6 +10,11 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import org.slf4j.LoggerFactory
 
+/**
+ * Cliente Ktor para integração com a API de dados abertos da ANVISA.
+ *
+ * @property httpClient O cliente HTTP para realizar as requisições.
+ */
 class AnvisaIntegrationKtorClient(
     private val httpClient: HttpClient
 ) : AnvisaIntegrationService {
@@ -17,6 +22,16 @@ class AnvisaIntegrationKtorClient(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val datasetUrl = "https://dados.gov.br/api/publico/conjuntos-dados/preco-de-medicamentos-no-brasil-consumidor"
 
+    /**
+     * Realiza o download do arquivo CSV de preços de medicamentos disponibilizado pela ANVISA.
+     *
+     * Primeiro, busca os metadados do conjunto de dados para encontrar a URL do recurso CSV.
+     * Em seguida, faz o download do arquivo a partir da URL encontrada, registrando o progresso.
+     *
+     * @return Um [ByteArray] contendo os dados do arquivo CSV.
+     * @throws AnvisaIntegrationException Se ocorrer uma falha na comunicação com a API da ANVISA
+     * ou se o recurso CSV não for encontrado.
+     */
     override suspend fun downloadPricesCsv(): ByteArray {
         val datasetResponse = httpClient.get(datasetUrl)
 

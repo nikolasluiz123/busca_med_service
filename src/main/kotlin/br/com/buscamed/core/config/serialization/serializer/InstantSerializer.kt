@@ -7,6 +7,12 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.time.Instant
 
+/**
+ * Serializador customizado do `kotlinx.serialization` para lidar com instâncias de [Instant].
+ * 
+ * Converte [Instant] para String no formato ISO-8601 e vice-versa,
+ * permitindo que DTOs usem classes de data/hora do pacote java.time.
+ */
 object InstantSerializer : KSerializer<Instant> {
     override val descriptor = PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
     

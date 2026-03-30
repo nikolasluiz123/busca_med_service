@@ -12,6 +12,15 @@ import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import java.time.Instant
 
+/**
+ * Caso de uso para importar e sincronizar as informações de medicamentos da ANVISA.
+ *
+ * @property integrationService O serviço para integrar com a ANVISA e baixar o CSV.
+ * @property csvParser O parser para processar o arquivo CSV.
+ * @property medicationRepository O repositório para salvar os medicamentos.
+ * @property storageService O serviço para armazenar o CSV processado.
+ * @property processControlRepository O repositório para controlar o estado do processo.
+ */
 class ImportAnvisaInformationUseCase(
     private val integrationService: AnvisaIntegrationService,
     private val csvParser: AnvisaCsvParser,
@@ -22,6 +31,16 @@ class ImportAnvisaInformationUseCase(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val processControlId = "ANVISA_MEDICATIONS_SYNC"
 
+    /**
+     * Executa o processo de importação e sincronização.
+     *
+     * 1. Baixa o arquivo CSV da ANVISA.
+     * 2. Faz o parsing do CSV, limpando e extraindo os dados.
+     * 3. Calcula o hash do arquivo limpo e compara com o último hash processado.
+     * 4. Se o hash for diferente, salva os novos dados no banco, armazena o novo CSV
+     *    e atualiza o registro de controle do processo.
+     * 5. Se o hash for igual, a sincronização é ignorada.
+     */
     suspend operator fun invoke() = withContext(Dispatchers.IO) {
         logger.info("Iniciando rotina de sincronização de medicamentos da ANVISA.")
         val rawCsvBytes = integrationService.downloadPricesCsv()
