@@ -1,5 +1,7 @@
 package br.com.buscamed.data.client.core.llm
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
 
 /**
@@ -17,6 +19,8 @@ abstract class LLMProcessClient {
     protected abstract val promptsDirectoryName: String
     /** O nome base do arquivo contendo o texto do prompt. */
     protected abstract val promptFileName: String
+    /** Objeto para realizar logs nos processos */
+    protected val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     /**
      * Lê e retorna a instrução de sistema a partir do arquivo de texto localizado em `prompts/`.

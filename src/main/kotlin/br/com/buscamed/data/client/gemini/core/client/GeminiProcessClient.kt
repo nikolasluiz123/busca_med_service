@@ -73,7 +73,12 @@ abstract class GeminiProcessClient(
             .map { it.firstOrNull()?.content()?.get()?.parts()?.get()?.firstOrNull()?.text()?.get() }
             .orElse("{}") ?: "{}"
 
-        val jsonElement = Json.parseToJsonElement(outputText)
+        val jsonElement = try {
+            Json.parseToJsonElement(outputText)
+        } catch (e: Exception) {
+            logger.error("Erro ao converter o retorno da LLM para um objeto JSON", e)
+            null
+        }
 
         return if (jsonElement is JsonObject) {
             LLMProcessResult(
