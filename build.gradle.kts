@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.serialization") version "2.3.0"
 
     id("io.ktor.plugin") version "3.4.1"
+    id("com.google.cloud.tools.jib") version "3.5.2"
 }
 
 group = "br.com"
@@ -59,4 +60,34 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+jib {
+    from {
+        image = "eclipse-temurin:23-jre"
+    }
+    extraDirectories {
+        paths {
+            path {
+                setFrom(project.file("openapi"))
+                into = "/openapi"
+            }
+        }
+    }
+    to {
+        val envProjectId = System.getenv("GCP_PROJECT_ID") ?: "buscamed-dev"
+        image = "southamerica-east1-docker.pkg.dev/$envProjectId/buscamed-repo/buscamed-service"
+
+        val customTag = project.findProperty("customTag") as String?
+        tags = if (customTag != null) {
+            setOf(customTag)
+        } else {
+            setOf("latest", version.toString())
+        }
+    }
+    container {
+        mainClass = "io.ktor.server.netty.EngineMain"
+        ports = listOf("8080")
+        jvmFlags = listOf("-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0")
+    }
 }

@@ -1,0 +1,61 @@
+name: Deploy BuscaMed Service
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  GCP_PROJECT_ID: busca-med-dev
+  GCP_REGION: southamerica-east1
+  ARTIFACT_REPO: buscamed-repo
+  SERVICE_NAME: buscamed-service
+
+  DEPLOYER_SA: github-deployer-sa@busca-med-dev.iam.gserviceaccount.com
+  RUNTIME_SA: run-buscamed-sa@busca-med-dev.iam.gserviceaccount.com
+  WIF_PROVIDER: projects/529020537081/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK 23
+        uses: actions/setup-java@v5
+        with:
+          java-version: '23'
+          distribution: 'corretto'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run Tests
+        run: ./gradlew test
+
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v3'
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.DEPLOYER_SA }}
+
+      - name: Build & Push Container
+        run: ./gradlew jib -PcustomTag=${{ github.sha }}
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: 'google-github-actions/deploy-cloudrun@v3'
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          region: ${{ env.GCP_REGION }}
+          image: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/buscamed-service:${{ github.sha }}
+          flags: '--service-account=${{ env.RUNTIME_SA }} --allow-unauthenticated'
+          env_vars: |
+            GCP_PROJECT_ID=${{ env.GCP_PROJECT_ID }}
+            GCP_SERVICE_AUDIENCE=https://${{ env.SERVICE_NAME }}-${{ env.GCP_PROJECT_ID }}.a.run.app
