@@ -8,12 +8,12 @@ import br.com.buscamed.domain.parser.AnvisaCsvParser
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVPrinter
+import org.apache.commons.csv.CSVRecord
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
-import java.nio.charset.Charset
 
 /**
  * Implementação de [AnvisaCsvParser] utilizando a biblioteca Apache Commons CSV.
@@ -40,28 +40,40 @@ class ApacheCommonsAnvisaCsvParser : AnvisaCsvParser {
         )
 
         var currentLine = 0
+        val headerMap = mutableMapOf<String, Int>()
 
         for (record in parser) {
             currentLine++
 
-            if (currentLine <= 41) {
+            if (record.size() == 0) continue
+
+            if (headerMap.isEmpty()) {
+                val firstCol = record.get(0).trim()
+                if (firstCol == "SUBSTÂNCIA") {
+                    for (i in 0 until record.size()) {
+                        headerMap[record.get(i).trim()] = i
+                    }
+                }
                 continue
             }
 
             try {
-                val ggremCode = record.get(3).trim()
-                val rawActiveIngredients = record.get(0)
-                val cnpj = record.get(1)
-                val laboratory = record.get(2)
-                val ean1 = parseEan(record.get(5))
-                val ean2 = parseEan(record.get(6))
-                val ean3 = parseEan(record.get(7))
-                val productName = record.get(8)
-                val presentation = record.get(9)
-                val therapeuticClass = record.get(10)
-                val productTypeStr = record.get(11)
-                val hospitalRestrictionStr = record.get(65)
-                val stripeStr = record.get(72)
+                val ggremCode = getColumnValue(record, headerMap, "CÓDIGO GGREM")
+
+                if (ggremCode.isEmpty()) continue
+
+                val rawActiveIngredients = getColumnValue(record, headerMap, "SUBSTÂNCIA")
+                val cnpj = getColumnValue(record, headerMap, "CNPJ")
+                val laboratory = getColumnValue(record, headerMap, "LABORATÓRIO")
+                val ean1 = parseEan(getColumnValue(record, headerMap, "EAN 1"))
+                val ean2 = parseEan(getColumnValue(record, headerMap, "EAN 2"))
+                val ean3 = parseEan(getColumnValue(record, headerMap, "EAN 3"))
+                val productName = getColumnValue(record, headerMap, "PRODUTO")
+                val presentation = getColumnValue(record, headerMap, "APRESENTAÇÃO")
+                val therapeuticClass = getColumnValue(record, headerMap, "CLASSE TERAPÊUTICA")
+                val productTypeStr = getColumnValue(record, headerMap, "TIPO DE PRODUTO (STATUS DO PRODUTO)")
+                val hospitalRestrictionStr = getColumnValue(record, headerMap, "RESTRIÇÃO HOSPITALAR")
+                val stripeStr = getColumnValue(record, headerMap, "TARJA")
 
                 val activeIngredientsList = rawActiveIngredients.split(";")
                     .map { it.trim() }
@@ -121,10 +133,28 @@ class ApacheCommonsAnvisaCsvParser : AnvisaCsvParser {
     }
 
     /**
-     * Trata o valor extraído da coluna de código de barras.
+     * Busca o valor de uma coluna com base no nome exato registrado no mapeamento de cabeçalho.
      *
-     * @param value O texto presente na coluna do CSV.
-     * @return A string limpa ou null se o valor indicar ausência de dado.
+     * @param record O registro CSV atual
+     * @param headerMap O mapa contendo os nomes das colunas e seus respectivos índices
+     * @param columnName O nome exato da coluna a ser buscada
+     * @return O valor em formato de string ou string vazia caso a coluna não exista no registro
+     */
+    private fun getColumnValue(record: CSVRecord, headerMap: Map<String, Int>, columnName: String): String {
+        val idx = headerMap[columnName]
+
+        return if (idx != null && idx < record.size()) {
+            record.get(idx).trim()
+        } else {
+            ""
+        }
+    }
+
+    /**
+     * Analisa o valor bruto do EAN e retorna nulo se for vazio ou um traço.
+     *
+     * @param value O valor original contido no CSV
+     * @return O código EAN ou null
      */
     private fun parseEan(value: String): String? {
         val cleanValue = value.trim()

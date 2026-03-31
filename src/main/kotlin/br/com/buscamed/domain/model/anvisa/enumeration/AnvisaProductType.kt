@@ -4,13 +4,14 @@ package br.com.buscamed.domain.model.anvisa.enumeration
  * Representa as categorias de produtos definidos pela ANVISA.
  */
 enum class AnvisaProductType(val description: String) {
-    BIOLOGIC("Biológicos"),
+    BIOLOGIC("Biológico"),
     NEW_BIOLOGIC("Biológico Novo"),
     SIMILAR("Similar"),
     GENERIC("Genérico"),
     NEW("Novo"),
     SPECIFIC("Específico"),
     RADIOPHARMACEUTICAL("Radiofármaco"),
+    ADVANCED_THERAPY("Produto de Terapia Avançada"),
     OTHER("Outros");
 
     companion object {

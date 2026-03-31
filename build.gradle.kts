@@ -48,4 +48,15 @@ dependencies {
     implementation("io.insert-koin:koin-logger-slf4j:4.1.1")
 
     implementation("org.apache.commons:commons-csv:1.14.1")
+
+    testImplementation("io.ktor:ktor-server-test-host")
+    testImplementation("io.ktor:ktor-client-mock")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("io.mockk:mockk:${project.property("mockk_version")}")
+    testImplementation("io.insert-koin:koin-test-junit5:4.1.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:${project.property("junit_version")}")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

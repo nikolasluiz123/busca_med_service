@@ -689,6 +689,25 @@
   <script>
     // Script section to load models into a JS Var
     var defs = {}
+            defs["DurationDTO"] = {
+  "type" : "object",
+  "properties" : {
+    "valor" : {
+      "type" : "number",
+      "nullable" : true,
+      "example" : 5.0
+    },
+    "unidade" : {
+      "type" : "string",
+      "nullable" : true,
+      "example" : "dias"
+    },
+    "uso_continuo" : {
+      "type" : "boolean",
+      "example" : false
+    }
+  }
+};
             defs["ErrorResponseDTO"] = {
   "type" : "object",
   "properties" : {
@@ -711,13 +730,33 @@
     "path" : {
       "type" : "string",
       "description" : "Caminho do endpoint que gerou o erro.",
-      "example" : "/v1/prescription/process-image"
+      "example" : "/v1/prescription/process/image"
     },
     "traceId" : {
       "type" : "string",
       "description" : "ID de rastreamento no Google Cloud Trace.",
       "nullable" : true,
       "example" : "105445aa7843bc8bf206b12000100000"
+    }
+  }
+};
+            defs["FrequencyDTO"] = {
+  "type" : "object",
+  "properties" : {
+    "intervalo" : {
+      "type" : "number",
+      "nullable" : true,
+      "example" : 8.0
+    },
+    "unidade" : {
+      "type" : "string",
+      "nullable" : true,
+      "example" : "horas"
+    },
+    "texto_orientacao" : {
+      "type" : "string",
+      "nullable" : true,
+      "example" : "De 8 em 8 horas após as refeições"
     }
   }
 };
@@ -767,59 +806,121 @@
       "description" : "Caminho do arquivo de imagem salvo no storage.",
       "nullable" : true,
       "example" : "gs://gemini_processed_images/medical_prescription/123.jpg"
+    },
+    "prompt" : {
+      "type" : "string",
+      "description" : "Arquivo de prompt utilizado na requisição.",
+      "example" : "medical_prescription_v1"
     }
   }
 };
-            defs["PillPackResponse"] = {
+            defs["PillPackComponentDTO"] = {
   "type" : "object",
   "properties" : {
     "principio_ativo" : {
       "type" : "string",
-      "nullable" : true,
       "example" : "Paracetamol"
     },
-    "dosagem" : {
+    "dosagem_valor" : {
+      "type" : "number",
+      "nullable" : true,
+      "example" : 750.0
+    },
+    "dosagem_unidade" : {
       "type" : "string",
       "nullable" : true,
-      "example" : "750mg"
+      "example" : "mg"
+    }
+  }
+};
+            defs["PillPackResponseDTO"] = {
+  "type" : "object",
+  "properties" : {
+    "nome_medicamento" : {
+      "type" : "string",
+      "nullable" : true,
+      "example" : "Tylenol"
+    },
+    "componentes" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/components/schemas/PillPackComponentDTO"
+      }
+    },
+    "uso" : {
+      "$ref" : "#/components/schemas/PillPackUsageDTO"
+    },
+    "indicacoes" : {
+      "type" : "array",
+      "example" : [ "Dor", "Febre" ],
+      "items" : {
+        "type" : "string"
+      }
     },
     "data_validade" : {
       "type" : "string",
       "nullable" : true,
       "example" : "10/25"
+    },
+    "lote" : {
+      "type" : "string",
+      "nullable" : true,
+      "example" : "L123456"
     }
   },
   "description" : "Estrutura retornada pelo Gemini baseada no prompt de cartela de medicamentos."
 };
-            defs["PrescriptionResponse"] = {
+            defs["PillPackUsageDTO"] = {
+  "type" : "object",
+  "properties" : {
+    "vias_administracao" : {
+      "type" : "array",
+      "example" : [ "Uso oral" ],
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "restricoes_idade" : {
+      "type" : "array",
+      "example" : [ "Uso adulto e pediátrico acima de 12 anos" ],
+      "items" : {
+        "type" : "string"
+      }
+    }
+  }
+};
+            defs["PrescriptionMedicationDTO"] = {
+  "type" : "object",
+  "properties" : {
+    "nome" : {
+      "type" : "string",
+      "nullable" : true,
+      "example" : "Amoxicilina"
+    },
+    "apresentacao_dosagem" : {
+      "$ref" : "#/components/schemas/ValueUnitDTO"
+    },
+    "dose" : {
+      "$ref" : "#/components/schemas/ValueUnitDTO"
+    },
+    "frequencia" : {
+      "$ref" : "#/components/schemas/FrequencyDTO"
+    },
+    "duracao" : {
+      "$ref" : "#/components/schemas/DurationDTO"
+    },
+    "quantidade_total_prescrita" : {
+      "$ref" : "#/components/schemas/ValueUnitDTO"
+    }
+  }
+};
+            defs["PrescriptionResponseDTO"] = {
   "type" : "object",
   "properties" : {
     "medicamentos" : {
       "type" : "array",
       "items" : {
-        "type" : "object",
-        "properties" : {
-          "nome" : {
-            "type" : "string",
-            "nullable" : true,
-            "example" : "Amoxicilina"
-          },
-          "dosagem" : {
-            "type" : "string",
-            "nullable" : true,
-            "example" : "500mg"
-          },
-          "frequencia" : {
-            "type" : "string",
-            "nullable" : true,
-            "example" : "De 8 em 8 horas"
-          },
-          "duracao" : {
-            "type" : "string",
-            "nullable" : true,
-            "example" : "7 dias"
-          }
-        }
+        "$ref" : "#/components/schemas/PrescriptionMedicationDTO"
       }
     }
   },
@@ -833,6 +934,21 @@
       "type" : "string",
       "description" : "O texto extraído ou digitado que será processado pela LLM.",
       "example" : "Tomar 1 comprimido de Dipirona 500mg de 8 em 8 horas durante 5 dias."
+    }
+  }
+};
+            defs["ValueUnitDTO"] = {
+  "type" : "object",
+  "properties" : {
+    "valor" : {
+      "type" : "number",
+      "nullable" : true,
+      "example" : 500.0
+    },
+    "unidade" : {
+      "type" : "string",
+      "nullable" : true,
+      "example" : "mg"
     }
   }
 };
@@ -860,6 +976,9 @@
                     <li data-group="PillPack" data-name="v1PillpackHistoryGet" class="">
                       <a href="#api-PillPack-v1PillpackHistoryGet">v1PillpackHistoryGet</a>
                     </li>
+                    <li data-group="PillPack" data-name="v1PillpackImageGet" class="">
+                      <a href="#api-PillPack-v1PillpackImageGet">v1PillpackImageGet</a>
+                    </li>
                     <li data-group="PillPack" data-name="v1PillpackProcessImagePost" class="">
                       <a href="#api-PillPack-v1PillpackProcessImagePost">v1PillpackProcessImagePost</a>
                     </li>
@@ -869,6 +988,9 @@
                   <li class="nav-header" data-group="Prescription"><a href="#api-Prescription">API Methods - Prescription</a></li>
                     <li data-group="Prescription" data-name="v1PrescriptionHistoryGet" class="">
                       <a href="#api-Prescription-v1PrescriptionHistoryGet">v1PrescriptionHistoryGet</a>
+                    </li>
+                    <li data-group="Prescription" data-name="v1PrescriptionImageGet" class="">
+                      <a href="#api-Prescription-v1PrescriptionImageGet">v1PrescriptionImageGet</a>
                     </li>
                     <li data-group="Prescription" data-name="v1PrescriptionProcessImagePost" class="">
                       <a href="#api-Prescription-v1PrescriptionProcessImagePost">v1PrescriptionProcessImagePost</a>
@@ -1209,7 +1331,7 @@ except ApiException as e:
                           <div class="tab-pane active" id="examples-PillPack-v1PillpackHistoryGet-0-curl">
                            <pre class="prettyprint"><code class="language-bsh">curl -X GET\
  -H "Authorization: Bearer [[accessToken]]"\
--H "Accept: application/json,text/plain"\
+-H "Accept: application/json"\
 "http://localhost:8080/v1/pillpack/history?startDate="</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-PillPack-v1PillpackHistoryGet-0-java">
@@ -1500,16 +1622,14 @@ except ApiException as e:
                                         var schemaWrapper = {
   "description" : "Formato de data inválido",
   "content" : {
-    "text/plain" : {
+    "application/json" : {
       "schema" : {
-        "type" : "string",
-        "example" : "O formato da data 'startDate' é inválido. Utilize o padrão ISO-8601.",
-        "x-content-type" : "text/plain"
+        "$ref" : "#/components/schemas/ErrorResponseDTO"
       }
     }
   }
 };
-                                        var schema = schemaWrapper.content["text/plain"].schema;
+                                        var schema = schemaWrapper.content["application/json"].schema;
                                         if (schema.$ref != null) {
                                           schema = defsParser.$refs.get(schema.$ref);
                                         } else {
@@ -1530,6 +1650,370 @@ except ApiException as e:
                                     </script>
                                   </div>
                                   <input id='responses-v1PillpackHistoryGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 401 -  </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-PillPack-v1PillpackImageGet">
+                      <article id="api-PillPack-v1PillpackImageGet-0" data-group="User" data-name="v1PillpackImageGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>v1PillpackImageGet</h1>
+                          <p>Download da imagem da cartela de comprimidos</p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Retorna os bytes da imagem processada com base no ID da execução. Requer autenticação OIDC de serviço.</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/v1/pillpack/image</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-PillPack-v1PillpackImageGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-PillPack-v1PillpackImageGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-PillPack-v1PillpackImageGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-PillPack-v1PillpackImageGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-PillPack-v1PillpackImageGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-PillPack-v1PillpackImageGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-PillPack-v1PillpackImageGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-PillPack-v1PillpackImageGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-PillPack-v1PillpackImageGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-PillPack-v1PillpackImageGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-PillPack-v1PillpackImageGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-PillPack-v1PillpackImageGet-0-curl">
+                           <pre class="prettyprint"><code class="language-bsh">curl -X GET\
+ -H "Authorization: Bearer [[accessToken]]"\
+-H "Accept: image/*,application/json"\
+"http://localhost:8080/v1/pillpack/image?executionId="</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-PillPack-v1PillpackImageGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.*;
+import io.swagger.client.auth.*;
+import io.swagger.client.model.*;
+import io.swagger.client.api.PillPackApi;
+
+import java.io.File;
+import java.util.*;
+
+public class PillPackApiExample {
+
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+
+
+        PillPackApi apiInstance = new PillPackApi();
+        String executionId = executionId_example; // String | ID da execução da LLM.
+        try {
+            byte[] result = apiInstance.v1PillpackImageGet(executionId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling PillPackApi#v1PillpackImageGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-PillPack-v1PillpackImageGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.api.PillPackApi;
+
+public class PillPackApiExample {
+
+    public static void main(String[] args) {
+        PillPackApi apiInstance = new PillPackApi();
+        String executionId = executionId_example; // String | ID da execução da LLM.
+        try {
+            byte[] result = apiInstance.v1PillpackImageGet(executionId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling PillPackApi#v1PillpackImageGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-PillPack-v1PillpackImageGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-PillPack-v1PillpackImageGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
+String *executionId = executionId_example; // ID da execução da LLM.
+
+PillPackApi *apiInstance = [[PillPackApi alloc] init];
+
+// Download da imagem da cartela de comprimidos
+[apiInstance v1PillpackImageGetWith:executionId
+              completionHandler: ^(byte[] output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-PillPack-v1PillpackImageGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var BuscaMedApi = require('busca_med_api');
+var defaultClient = BuscaMedApi.ApiClient.instance;
+
+
+var api = new BuscaMedApi.PillPackApi()
+var executionId = executionId_example; // {{String}} ID da execução da LLM.
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.v1PillpackImageGet(executionId, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-PillPack-v1PillpackImageGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-PillPack-v1PillpackImageGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using IO.Swagger.Api;
+using IO.Swagger.Client;
+using IO.Swagger.Model;
+
+namespace Example
+{
+    public class v1PillpackImageGetExample
+    {
+        public void main()
+        {
+
+
+            var apiInstance = new PillPackApi();
+            var executionId = executionId_example;  // String | ID da execução da LLM.
+
+            try
+            {
+                // Download da imagem da cartela de comprimidos
+                byte[] result = apiInstance.v1PillpackImageGet(executionId);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling PillPackApi.v1PillpackImageGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-PillPack-v1PillpackImageGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+
+$api_instance = new Swagger\Client\ApiPillPackApi();
+$executionId = executionId_example; // String | ID da execução da LLM.
+
+try {
+    $result = $api_instance->v1PillpackImageGet($executionId);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling PillPackApi->v1PillpackImageGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-PillPack-v1PillpackImageGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::SwaggerClient::Configuration;
+use WWW::SwaggerClient::PillPackApi;
+
+
+my $api_instance = WWW::SwaggerClient::PillPackApi->new();
+my $executionId = executionId_example; # String | ID da execução da LLM.
+
+eval { 
+    my $result = $api_instance->v1PillpackImageGet(executionId => $executionId);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling PillPackApi->v1PillpackImageGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-PillPack-v1PillpackImageGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_client
+from swagger_client.rest import ApiException
+from pprint import pprint
+
+
+# create an instance of the API class
+api_instance = swagger_client.PillPackApi()
+executionId = executionId_example # String | ID da execução da LLM.
+
+try: 
+    # Download da imagem da cartela de comprimidos
+    api_response = api_instance.v1_pillpack_image_get(executionId)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling PillPackApi->v1PillpackImageGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">executionId*</td>
+                                <td>
+                                
+                                
+                                    <div id="d2e199_v1PillpackImageGet_executionId">
+                                        <div class="json-schema-view">
+                                            <div class="primitive">
+                                                <span class="type">
+                                                    String
+                                                </span>
+                                
+                                                    <div class="inner description">
+                                                        ID da execução da LLM.
+                                                    </div>
+                                            </div>
+                                                <div class="inner required">
+                                                    Required
+                                                </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                </tr>
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - Imagem retornada com sucesso </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-v1PillpackImageGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-v1PillpackImageGet-200-schema">
+                                  <div id='responses-v1PillpackImageGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Imagem retornada com sucesso",
+  "content" : {
+    "image/*" : {
+      "schema" : {
+        "type" : "string",
+        "format" : "binary",
+        "x-content-type" : "image/*"
+      }
+    }
+  }
+};
+                                        var schema = schemaWrapper.content["image/*"].schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.components = {};
+                                          schemaWrapper.components.schemas = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-v1PillpackImageGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-v1PillpackImageGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-v1PillpackImageGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Imagem não encontrada </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-v1PillpackImageGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-v1PillpackImageGet-404-schema">
+                                  <div id='responses-v1PillpackImageGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Imagem não encontrada",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/ErrorResponseDTO"
+      }
+    }
+  }
+};
+                                        var schema = schemaWrapper.content["application/json"].schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.components = {};
+                                          schemaWrapper.components.schemas = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-v1PillpackImageGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-v1PillpackImageGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-v1PillpackImageGet-404-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -1601,7 +2085,7 @@ public class PillPackApiExample {
         byte[] image = image_example; // byte[] | 
         String mimeType = mimeType_example; // String | 
         try {
-            PillPackResponse result = apiInstance.v1PillpackProcessImagePost(image, mimeType);
+            PillPackResponseDTO result = apiInstance.v1PillpackProcessImagePost(image, mimeType);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PillPackApi#v1PillpackProcessImagePost");
@@ -1621,7 +2105,7 @@ public class PillPackApiExample {
         byte[] image = image_example; // byte[] | 
         String mimeType = mimeType_example; // String | 
         try {
-            PillPackResponse result = apiInstance.v1PillpackProcessImagePost(image, mimeType);
+            PillPackResponseDTO result = apiInstance.v1PillpackProcessImagePost(image, mimeType);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PillPackApi#v1PillpackProcessImagePost");
@@ -1644,7 +2128,7 @@ PillPackApi *apiInstance = [[PillPackApi alloc] init];
 // Processa a imagem de uma cartela de comprimidos
 [apiInstance v1PillpackProcessImagePostWith:image
     mimeType:mimeType
-              completionHandler: ^(PillPackResponse output, NSError* error) {
+              completionHandler: ^(PillPackResponseDTO output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -1700,7 +2184,7 @@ namespace Example
             try
             {
                 // Processa a imagem de uma cartela de comprimidos
-                PillPackResponse result = apiInstance.v1PillpackProcessImagePost(image, mimeType);
+                PillPackResponseDTO result = apiInstance.v1PillpackProcessImagePost(image, mimeType);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -1847,7 +2331,7 @@ except ApiException as e:
   "content" : {
     "application/json" : {
       "schema" : {
-        "$ref" : "#/components/schemas/PillPackResponse"
+        "$ref" : "#/components/schemas/PillPackResponseDTO"
       }
     }
   }
@@ -1991,7 +2475,7 @@ public class PillPackApiExample {
         PillPackApi apiInstance = new PillPackApi();
         TextRequestDTO body = ; // TextRequestDTO | 
         try {
-            PillPackResponse result = apiInstance.v1PillpackProcessTextPost(body);
+            PillPackResponseDTO result = apiInstance.v1PillpackProcessTextPost(body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PillPackApi#v1PillpackProcessTextPost");
@@ -2010,7 +2494,7 @@ public class PillPackApiExample {
         PillPackApi apiInstance = new PillPackApi();
         TextRequestDTO body = ; // TextRequestDTO | 
         try {
-            PillPackResponse result = apiInstance.v1PillpackProcessTextPost(body);
+            PillPackResponseDTO result = apiInstance.v1PillpackProcessTextPost(body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PillPackApi#v1PillpackProcessTextPost");
@@ -2031,7 +2515,7 @@ PillPackApi *apiInstance = [[PillPackApi alloc] init];
 
 // Processa o texto de uma cartela de comprimidos
 [apiInstance v1PillpackProcessTextPostWith:body
-              completionHandler: ^(PillPackResponse output, NSError* error) {
+              completionHandler: ^(PillPackResponseDTO output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -2085,7 +2569,7 @@ namespace Example
             try
             {
                 // Processa o texto de uma cartela de comprimidos
-                PillPackResponse result = apiInstance.v1PillpackProcessTextPost(body);
+                PillPackResponseDTO result = apiInstance.v1PillpackProcessTextPost(body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -2224,7 +2708,7 @@ except ApiException as e:
   "content" : {
     "application/json" : {
       "schema" : {
-        "$ref" : "#/components/schemas/PillPackResponse"
+        "$ref" : "#/components/schemas/PillPackResponseDTO"
       }
     }
   }
@@ -2349,7 +2833,7 @@ except ApiException as e:
                           <div class="tab-pane active" id="examples-Prescription-v1PrescriptionHistoryGet-0-curl">
                            <pre class="prettyprint"><code class="language-bsh">curl -X GET\
  -H "Authorization: Bearer [[accessToken]]"\
--H "Accept: application/json,text/plain"\
+-H "Accept: application/json"\
 "http://localhost:8080/v1/prescription/history?startDate="</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Prescription-v1PrescriptionHistoryGet-0-java">
@@ -2640,16 +3124,14 @@ except ApiException as e:
                                         var schemaWrapper = {
   "description" : "Formato de data inválido",
   "content" : {
-    "text/plain" : {
+    "application/json" : {
       "schema" : {
-        "type" : "string",
-        "example" : "O formato da data 'startDate' é inválido. Utilize o padrão ISO-8601.",
-        "x-content-type" : "text/plain"
+        "$ref" : "#/components/schemas/ErrorResponseDTO"
       }
     }
   }
 };
-                                        var schema = schemaWrapper.content["text/plain"].schema;
+                                        var schema = schemaWrapper.content["application/json"].schema;
                                         if (schema.$ref != null) {
                                           schema = defsParser.$refs.get(schema.$ref);
                                         } else {
@@ -2684,6 +3166,370 @@ except ApiException as e:
                         </article>
                       </div>
                       <hr>
+                    <div id="api-Prescription-v1PrescriptionImageGet">
+                      <article id="api-Prescription-v1PrescriptionImageGet-0" data-group="User" data-name="v1PrescriptionImageGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>v1PrescriptionImageGet</h1>
+                          <p>Download da imagem da prescrição médica</p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Retorna os bytes da imagem processada com base no ID da execução. Requer autenticação OIDC de serviço.</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/v1/prescription/image</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Prescription-v1PrescriptionImageGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Prescription-v1PrescriptionImageGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Prescription-v1PrescriptionImageGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Prescription-v1PrescriptionImageGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Prescription-v1PrescriptionImageGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Prescription-v1PrescriptionImageGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Prescription-v1PrescriptionImageGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Prescription-v1PrescriptionImageGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Prescription-v1PrescriptionImageGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Prescription-v1PrescriptionImageGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Prescription-v1PrescriptionImageGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Prescription-v1PrescriptionImageGet-0-curl">
+                           <pre class="prettyprint"><code class="language-bsh">curl -X GET\
+ -H "Authorization: Bearer [[accessToken]]"\
+-H "Accept: image/*,application/json"\
+"http://localhost:8080/v1/prescription/image?executionId="</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Prescription-v1PrescriptionImageGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.*;
+import io.swagger.client.auth.*;
+import io.swagger.client.model.*;
+import io.swagger.client.api.PrescriptionApi;
+
+import java.io.File;
+import java.util.*;
+
+public class PrescriptionApiExample {
+
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+
+
+        PrescriptionApi apiInstance = new PrescriptionApi();
+        String executionId = executionId_example; // String | ID da execução da LLM.
+        try {
+            byte[] result = apiInstance.v1PrescriptionImageGet(executionId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling PrescriptionApi#v1PrescriptionImageGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Prescription-v1PrescriptionImageGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.api.PrescriptionApi;
+
+public class PrescriptionApiExample {
+
+    public static void main(String[] args) {
+        PrescriptionApi apiInstance = new PrescriptionApi();
+        String executionId = executionId_example; // String | ID da execução da LLM.
+        try {
+            byte[] result = apiInstance.v1PrescriptionImageGet(executionId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling PrescriptionApi#v1PrescriptionImageGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Prescription-v1PrescriptionImageGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Prescription-v1PrescriptionImageGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
+String *executionId = executionId_example; // ID da execução da LLM.
+
+PrescriptionApi *apiInstance = [[PrescriptionApi alloc] init];
+
+// Download da imagem da prescrição médica
+[apiInstance v1PrescriptionImageGetWith:executionId
+              completionHandler: ^(byte[] output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Prescription-v1PrescriptionImageGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var BuscaMedApi = require('busca_med_api');
+var defaultClient = BuscaMedApi.ApiClient.instance;
+
+
+var api = new BuscaMedApi.PrescriptionApi()
+var executionId = executionId_example; // {{String}} ID da execução da LLM.
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.v1PrescriptionImageGet(executionId, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Prescription-v1PrescriptionImageGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Prescription-v1PrescriptionImageGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using IO.Swagger.Api;
+using IO.Swagger.Client;
+using IO.Swagger.Model;
+
+namespace Example
+{
+    public class v1PrescriptionImageGetExample
+    {
+        public void main()
+        {
+
+
+            var apiInstance = new PrescriptionApi();
+            var executionId = executionId_example;  // String | ID da execução da LLM.
+
+            try
+            {
+                // Download da imagem da prescrição médica
+                byte[] result = apiInstance.v1PrescriptionImageGet(executionId);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling PrescriptionApi.v1PrescriptionImageGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Prescription-v1PrescriptionImageGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+
+$api_instance = new Swagger\Client\ApiPrescriptionApi();
+$executionId = executionId_example; // String | ID da execução da LLM.
+
+try {
+    $result = $api_instance->v1PrescriptionImageGet($executionId);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling PrescriptionApi->v1PrescriptionImageGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Prescription-v1PrescriptionImageGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::SwaggerClient::Configuration;
+use WWW::SwaggerClient::PrescriptionApi;
+
+
+my $api_instance = WWW::SwaggerClient::PrescriptionApi->new();
+my $executionId = executionId_example; # String | ID da execução da LLM.
+
+eval { 
+    my $result = $api_instance->v1PrescriptionImageGet(executionId => $executionId);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling PrescriptionApi->v1PrescriptionImageGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Prescription-v1PrescriptionImageGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_client
+from swagger_client.rest import ApiException
+from pprint import pprint
+
+
+# create an instance of the API class
+api_instance = swagger_client.PrescriptionApi()
+executionId = executionId_example # String | ID da execução da LLM.
+
+try: 
+    # Download da imagem da prescrição médica
+    api_response = api_instance.v1_prescription_image_get(executionId)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling PrescriptionApi->v1PrescriptionImageGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">executionId*</td>
+                                <td>
+                                
+                                
+                                    <div id="d2e199_v1PrescriptionImageGet_executionId">
+                                        <div class="json-schema-view">
+                                            <div class="primitive">
+                                                <span class="type">
+                                                    String
+                                                </span>
+                                
+                                                    <div class="inner description">
+                                                        ID da execução da LLM.
+                                                    </div>
+                                            </div>
+                                                <div class="inner required">
+                                                    Required
+                                                </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                </tr>
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - Imagem retornada com sucesso </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-v1PrescriptionImageGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-v1PrescriptionImageGet-200-schema">
+                                  <div id='responses-v1PrescriptionImageGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Imagem retornada com sucesso",
+  "content" : {
+    "image/*" : {
+      "schema" : {
+        "type" : "string",
+        "format" : "binary",
+        "x-content-type" : "image/*"
+      }
+    }
+  }
+};
+                                        var schema = schemaWrapper.content["image/*"].schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.components = {};
+                                          schemaWrapper.components.schemas = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-v1PrescriptionImageGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-v1PrescriptionImageGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-v1PrescriptionImageGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Imagem não encontrada </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-v1PrescriptionImageGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-v1PrescriptionImageGet-404-schema">
+                                  <div id='responses-v1PrescriptionImageGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Imagem não encontrada",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/ErrorResponseDTO"
+      }
+    }
+  }
+};
+                                        var schema = schemaWrapper.content["application/json"].schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.components = {};
+                                          schemaWrapper.components.schemas = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-v1PrescriptionImageGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-v1PrescriptionImageGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-v1PrescriptionImageGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 401 -  </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-Prescription-v1PrescriptionProcessImagePost">
                       <article id="api-Prescription-v1PrescriptionProcessImagePost-0" data-group="User" data-name="v1PrescriptionProcessImagePost" data-version="0">
                         <div class="pull-left">
@@ -2693,7 +3539,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Recebe o arquivo de imagem de uma receita médica e extrai os dados estruturados dos medicamentos receitados (nome, dosagem, frequência e duração).</p>
+                        <p class="marked">Recebe o arquivo de imagem de uma receita médica e extrai os dados estruturados dos medicamentos receitados.</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/v1/prescription/process/image</span></code></pre>
@@ -2741,7 +3587,7 @@ public class PrescriptionApiExample {
         byte[] image = image_example; // byte[] | 
         String mimeType = mimeType_example; // String | 
         try {
-            PrescriptionResponse result = apiInstance.v1PrescriptionProcessImagePost(image, mimeType);
+            PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessImagePost(image, mimeType);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PrescriptionApi#v1PrescriptionProcessImagePost");
@@ -2761,7 +3607,7 @@ public class PrescriptionApiExample {
         byte[] image = image_example; // byte[] | 
         String mimeType = mimeType_example; // String | 
         try {
-            PrescriptionResponse result = apiInstance.v1PrescriptionProcessImagePost(image, mimeType);
+            PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessImagePost(image, mimeType);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PrescriptionApi#v1PrescriptionProcessImagePost");
@@ -2784,7 +3630,7 @@ PrescriptionApi *apiInstance = [[PrescriptionApi alloc] init];
 // Processa a imagem de uma prescrição médica
 [apiInstance v1PrescriptionProcessImagePostWith:image
     mimeType:mimeType
-              completionHandler: ^(PrescriptionResponse output, NSError* error) {
+              completionHandler: ^(PrescriptionResponseDTO output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -2840,7 +3686,7 @@ namespace Example
             try
             {
                 // Processa a imagem de uma prescrição médica
-                PrescriptionResponse result = apiInstance.v1PrescriptionProcessImagePost(image, mimeType);
+                PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessImagePost(image, mimeType);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -2987,7 +3833,7 @@ except ApiException as e:
   "content" : {
     "application/json" : {
       "schema" : {
-        "$ref" : "#/components/schemas/PrescriptionResponse"
+        "$ref" : "#/components/schemas/PrescriptionResponseDTO"
       }
     }
   }
@@ -3179,7 +4025,7 @@ public class PrescriptionApiExample {
         PrescriptionApi apiInstance = new PrescriptionApi();
         TextRequestDTO body = ; // TextRequestDTO | 
         try {
-            PrescriptionResponse result = apiInstance.v1PrescriptionProcessTextPost(body);
+            PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessTextPost(body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PrescriptionApi#v1PrescriptionProcessTextPost");
@@ -3198,7 +4044,7 @@ public class PrescriptionApiExample {
         PrescriptionApi apiInstance = new PrescriptionApi();
         TextRequestDTO body = ; // TextRequestDTO | 
         try {
-            PrescriptionResponse result = apiInstance.v1PrescriptionProcessTextPost(body);
+            PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessTextPost(body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PrescriptionApi#v1PrescriptionProcessTextPost");
@@ -3219,7 +4065,7 @@ PrescriptionApi *apiInstance = [[PrescriptionApi alloc] init];
 
 // Processa o texto de uma prescrição médica
 [apiInstance v1PrescriptionProcessTextPostWith:body
-              completionHandler: ^(PrescriptionResponse output, NSError* error) {
+              completionHandler: ^(PrescriptionResponseDTO output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -3273,7 +4119,7 @@ namespace Example
             try
             {
                 // Processa o texto de uma prescrição médica
-                PrescriptionResponse result = apiInstance.v1PrescriptionProcessTextPost(body);
+                PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessTextPost(body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -3412,7 +4258,7 @@ except ApiException as e:
   "content" : {
     "application/json" : {
       "schema" : {
-        "$ref" : "#/components/schemas/PrescriptionResponse"
+        "$ref" : "#/components/schemas/PrescriptionResponseDTO"
       }
     }
   }
