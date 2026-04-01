@@ -29,12 +29,10 @@ fun Application.configureStatusPages() {
             val traceId = call.response.headers["X-Cloud-Trace-Context"]
             val ktorStatusCode = HttpStatusCode.fromValue(cause.statusCode)
 
-            if (cause.statusCode >= 500) {
+            if (cause is IntegrationException) {
+                logger.error("Detalhes técnicos da integração: ${cause.serviceName} -> ${cause.technicalMessage}")
+            } else if (cause.statusCode >= 500) {
                 logger.error("Erro de Sistema [${cause.errorCode}]: ${cause.message}", cause)
-
-                if (cause is IntegrationException) {
-                    logger.error("Detalhes técnicos da integração: ${cause.serviceName} -> ${cause.technicalMessage}")
-                }
             } else {
                 logger.warn("Erro de Negócio [${cause.errorCode}]: ${cause.message} (User: ${call.extractUserLogInfo()})")
             }

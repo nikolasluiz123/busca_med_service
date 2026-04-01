@@ -21,6 +21,7 @@ class AnvisaIntegrationKtorClient(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val datasetUrl = "https://dados.gov.br/api/publico/conjuntos-dados/preco-de-medicamentos-no-brasil-consumidor"
+    private val directLink = "https://dados.anvisa.gov.br/dados/TA_PRECO_MEDICAMENTO.csv"
 
     /**
      * Realiza o download do arquivo CSV de preços de medicamentos disponibilizado pela ANVISA.
@@ -35,24 +36,21 @@ class AnvisaIntegrationKtorClient(
     override suspend fun downloadPricesCsv(): ByteArray {
         val datasetResponse = httpClient.get(datasetUrl)
 
-        if (!datasetResponse.status.isSuccess()) {
-            throw AnvisaIntegrationException(
-                technicalMessage = "Falha na integração com a ANVISA ao buscar metadados. Status HTTP: ${datasetResponse.status}",
-                statusCode = datasetResponse.status.value
+        val targetUrl = if (datasetResponse.status.isSuccess()) {
+            val metadata: AnvisaDatasetResponseDTO = datasetResponse.body()
+            val csvResource = metadata.resources.firstOrNull { it.format.equals("CSV", ignoreCase = true) }
+            
+            csvResource?.url ?: throw AnvisaIntegrationException(
+                technicalMessage = "O recurso no formato CSV não foi encontrado no payload da ANVISA.",
+                statusCode = HttpStatusCode.NotFound.value
             )
+        } else {
+            directLink
         }
-
-        val metadata: AnvisaDatasetResponseDTO = datasetResponse.body()
-
-        val csvResource = metadata.resources.firstOrNull { it.format.equals("CSV", ignoreCase = true) }
-        val csvResourceUrl = csvResource?.url ?: throw AnvisaIntegrationException(
-            technicalMessage = "O recurso no formato CSV não foi encontrado no payload da ANVISA.",
-            statusCode = HttpStatusCode.NotFound.value
-        )
 
         var lastLoggedProgress = 0L
 
-        return httpClient.prepareGet(csvResourceUrl) {
+        return httpClient.prepareGet(targetUrl) {
             onDownload { bytesSentTotal, contentLength ->
                 if (contentLength != null && contentLength > 0) {
                     val progress = (bytesSentTotal * 100) / contentLength
