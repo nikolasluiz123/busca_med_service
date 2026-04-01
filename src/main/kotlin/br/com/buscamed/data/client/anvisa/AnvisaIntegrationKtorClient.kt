@@ -26,8 +26,10 @@ class AnvisaIntegrationKtorClient(
     /**
      * Realiza o download do arquivo CSV de preços de medicamentos disponibilizado pela ANVISA.
      *
-     * Primeiro, busca os metadados do conjunto de dados para encontrar a URL do recurso CSV.
-     * Em seguida, faz o download do arquivo a partir da URL encontrada, registrando o progresso.
+     * Primeiro, tenta buscar os metadados do conjunto de dados para encontrar a URL do recurso CSV.
+     * Se essa chamada der sucesso, faz o download do arquivo a partir da URL encontrada, registrando o progresso.
+     *
+     * Se não for possível chamar [datasetUrl] por algum motivo, tenta fazer uso do link direto de download do CSV.
      *
      * @return Um [ByteArray] contendo os dados do arquivo CSV.
      * @throws AnvisaIntegrationException Se ocorrer uma falha na comunicação com a API da ANVISA
