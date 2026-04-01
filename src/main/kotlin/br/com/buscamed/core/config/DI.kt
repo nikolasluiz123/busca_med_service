@@ -30,6 +30,7 @@ import br.com.buscamed.domain.repository.AnvisaMedicationRepository
 import br.com.buscamed.domain.repository.LLMExecutionHistoryRepository
 import br.com.buscamed.domain.repository.SystemProcessControlRepository
 import br.com.buscamed.domain.service.AnvisaIntegrationService
+import br.com.buscamed.domain.service.CsvStorageService
 import br.com.buscamed.domain.usecase.*
 import com.google.cloud.firestore.Firestore
 import com.google.cloud.firestore.FirestoreOptions
@@ -155,7 +156,7 @@ fun appModule(environment: ApplicationEnvironment) = module {
 
     single { MedicalPrescriptionGoogleStorageClient(storage = get()) }
     single { PillPackGoogleStorageClient(storage = get()) }
-    single { AnvisaCsvGoogleStorageClient(storage = get()) }
+    single<CsvStorageService> { AnvisaCsvGoogleStorageClient(storage = get()) }
 
     single { GeminiMedicalPrescriptionImageProcessClient(config = get()) }
     single { GeminiPillPackImageProcessClient(config = get()) }
