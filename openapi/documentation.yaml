@@ -6,6 +6,8 @@ info:
   version: 0.1.0
 
 servers:
+  - url: https://buscamed-service-7zd5rrmmaq-rj.a.run.app
+    description: Servidor Cloud Run
   - url: http://localhost:8080
     description: Servidor Local
 
