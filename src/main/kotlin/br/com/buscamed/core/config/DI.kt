@@ -231,18 +231,18 @@ fun appModule(environment: ApplicationEnvironment) = module {
 
     factory {
         PrescriptionController(
-            processImageUseCase = get(),
-            processTextUseCase = get(),
-            getHistoryUseCase = get(),
+            processImageUseCase = get(named(DiQualifiers.UC_PROCESS_IMAGE_PRESCRIPTION)),
+            processTextUseCase = get(named(DiQualifiers.UC_PROCESS_TEXT_PRESCRIPTION)),
+            getHistoryUseCase = get(named(DiQualifiers.UC_GET_HISTORY_PRESCRIPTION)),
             downloadImageUseCase = get(named(DiQualifiers.UC_DOWNLOAD_MEDICAL_PRESCRIPTION_IMAGE))
         )
     }
 
     factory {
         PillPackController(
-            processImageUseCase = get(),
-            processTextUseCase = get(),
-            getHistoryUseCase = get(),
+            processImageUseCase = get(named(DiQualifiers.UC_PROCESS_IMAGE_PILL_PACK)),
+            processTextUseCase = get(named(DiQualifiers.UC_PROCESS_TEXT_PILL_PACK)),
+            getHistoryUseCase = get(named(DiQualifiers.UC_GET_HISTORY_PILL_PACK)),
             downloadImageUseCase = get(named(DiQualifiers.UC_DOWNLOAD_PILL_PACK_IMAGE))
         )
     }
