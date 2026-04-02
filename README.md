@@ -63,19 +63,25 @@ O projeto segue os princípios da Clean Architecture (Arquitetura Limpa), dividi
 ### api (Camada de Apresentação)
 
 Responsável por receber requisições HTTP e devolver respostas. Não contém regras de negócio.
+
 **Exemplo Prático:** PrescriptionController. Ele recebe um JSON com o texto da receita, passa para o ProcessTextUseCase e devolve o DTO ao usuário.
-**Regra:** Os DTOs (Data Transfer Objects) pertencem a essa camada.
+
+**Regra:** Os DTOs (Data Transfer Objects) em sua enorme maioria pertencem a essa camada, aqui que são definidas as rotas e os controllers que apenas cuidam da passagem de dados para outras camadas.
 
 ### domain (Camada de Domínio)
 
 O coração da aplicação. Contém as entidades principais e os Casos de Uso (Use Cases). Não conhece banco de dados ou frameworks web.
+
 **Exemplo Prático:** ProcessImageUseCase. Ele define os passos: receber a imagem, chamar o serviço do LLM, salvar o histórico de execução no repositório e despachar o salvamento da imagem no Storage.
+
 **Regra:** Se precisar acessar dados externos, crie uma interface aqui (ex: AnvisaMedicationRepository) que será implementada na camada data.
 
 ### data (Camada de Dados / Infraestrutura)
 
 Implementa as interfaces definidas no domain. É aqui que lidamos com o mundo externo (Firestore, Google Cloud Storage, APIs REST, SDK do Gemini).
+
 **Exemplo Prático:** FirestoreAnvisaMedicationDataSource (lida com as queries no Firestore) ou GeminiMedicalPrescriptionImageProcessClient (lida com o SDK do Google GenAI).
+
 **Regra:** Converte as respostas externas (como AnvisaMedicationDocument) para as entidades limpas do domain (como AnvisaMedication) antes de devolver para o Use Case.
 
 ### core (Camada Transversal)
@@ -87,7 +93,9 @@ Configurações globais, injeção de dependência (Koin), segurança, exceçõe
 Os testes são focados em garantir o comportamento sem depender de bancos de dados reais.
 
 **Testes de Roteamento (RoutingTest)**: Utilizamos o testApplication do Ktor. Mockamos os Use Cases usando o MockK para verificar se os endpoints respondem com o status HTTP correto (ex: validando o comportamento sem autenticação em PrescriptionRoutingTest.kt).
+
 **Testes de Integração Simulados (KtorClientTest)**: Para clientes HTTP externos (como a ANVISA), usamos o MockEngine do Ktor para simular respostas (ex: HttpStatusCode.BadGateway) e validar se o sistema lança as exceções corretas.
+
 **Testes Unitários: **Focados em regras de negócio puras ou parsers (ex: ApacheCommonsAnvisaCsvParserTest), validando transformações de dados.
 
 **Como continuar com os testes:**
