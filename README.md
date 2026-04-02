@@ -94,26 +94,6 @@ Os testes são focados em garantir o comportamento sem depender de bancos de dad
 
 Ao criar um novo Use Case, injete suas dependências via construtor, instancie a classe no teste passando mockk<NomeDoRepositorio>() e valide os fluxos com coEvery { ... } returns
 
-### Guia de Permissões (IAM e Firebase) para a Equipe
-
-Para liberar acessos aos seus desenvolvedores garantindo a segurança e o controle de custos do seu projeto na nuvem, você deve configurar as seguintes permissões.
-
-#### 1. Acesso ao GCP (Google Cloud Platform)
-
-No console do GCP, vá em **IAM & Admin -> IAM**. Adicione o e-mail do desenvolvedor e conceda as seguintes *Roles* (Papéis):
-
-* **Vertex AI User (`roles/aiplatform.user`):** Essencial para que eles possam chamar a API do Gemini via código a partir de suas máquinas locais.
-* **Cloud Datastore User (`roles/datastore.user`):** Permite leitura e escrita no Firestore (banco de dados).
-* **Storage Object Admin (`roles/storage.objectAdmin`):** Permite leitura e escrita nos buckets do Google Cloud Storage. Se quiser restringir mais, você pode aplicar essa permissão diretamente nos buckets `gemini_processed_images` e `anvisa_csv_files` ao invés de no projeto inteiro.
-* **Logs Viewer (`roles/logging.viewer`):** Permite que eles vejam os logs caso o serviço esteja rodando na nuvem.
-* **Service Account Token Creator (`roles/iam.serviceAccountTokenCreator`):** Necessário se eles precisarem impersonar uma Service Account específica para gerar tokens OIDC mais sofisticados, ou você pode simplesmente deixá-los usar suas próprias contas de usuário via `gcloud auth print-identity-token` (que gerará um token com o e-mail deles no Issuer).
-
-**O que NÃO conceder:** Evite os papéis de `Owner`, `Editor` e `Project IAM Admin`. Com a lista acima, eles não conseguem criar máquinas virtuais (Compute Engine), não conseguem deletar o banco de dados inteiro (apenas interagir com os dados) e não podem convidar outras pessoas.
-
-#### 2. Acesso ao Firebase (Para geração de Token JWT)
-
-Para que eles possam acessar a Web API Key e olhar a lista de usuários (para pegar um e-mail de teste), sem alterar regras de banco ou deletar o projeto:
-
 1. Acesse o **Console do Firebase**.
 2. Vá em Configurações do Projeto > Usuários e Permissões.
 3. Adicione o e-mail do desenvolvedor e atribua o papel: **Firebase Viewer** (Visualizador do Firebase) ou, se quiser ser mais específico, vá no IAM do GCP e dê **Firebase Authentication Viewer**.
