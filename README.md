@@ -2,6 +2,8 @@
 
 Bem-vindo ao repositório do BuscaMed (Backend). Este serviço é construído em Kotlin com Ktor e utiliza a API do Google Gemini para extração de dados médicos (receitas e cartelas de comprimidos), além de integrar com a base de dados abertos da ANVISA.
 
+O acesso remoto para o serviço é [esse](https://buscamed-service-7zd5rrmmaq-rj.a.run.app/swagger) 
+
 ## 🛠️ Configuração do Ambiente Local (Windows)
 
 Para rodar o projeto localmente e autenticar com os serviços do Google Cloud Platform (GCP), você precisa instalar o Google Cloud CLI (`gcloud`).
