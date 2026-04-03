@@ -26,8 +26,9 @@ object HttpClientFactory {
      */
     fun createClient(
         jsonInstance: Json = DefaultJson,
-        requestTimeoutMillis: Long = 10_000,
-        connectTimeoutMillis: Long = 5_000,
+        requestTimeoutMillis: Long = 180_000,
+        socketTimeoutMillis: Long = 120_000,
+        connectTimeoutMillis: Long = 10_000,
         extraConfig: HttpClientConfig<CIOEngineConfig>.() -> Unit = {}
     ): HttpClient {
         return HttpClient(CIO) {
@@ -38,6 +39,7 @@ object HttpClientFactory {
             install(HttpTimeout) {
                 this.requestTimeoutMillis = requestTimeoutMillis
                 this.connectTimeoutMillis = connectTimeoutMillis
+                this.socketTimeoutMillis = socketTimeoutMillis
             }
 
             extraConfig()

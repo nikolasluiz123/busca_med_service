@@ -113,8 +113,9 @@ fun appModule(environment: ApplicationEnvironment) = module {
 
     single<HttpClient>(named(DiQualifiers.HTTP_CLIENT_ANVISA)) {
         HttpClientFactory.createClient(
-            connectTimeoutMillis = 300_000,
-            requestTimeoutMillis = 600_000
+            connectTimeoutMillis = 120_000,
+            requestTimeoutMillis = 240_000,
+            socketTimeoutMillis = 120_000
         )
     }
 
