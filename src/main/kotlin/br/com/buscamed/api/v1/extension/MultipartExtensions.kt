@@ -11,7 +11,7 @@ import kotlinx.io.readByteArray
 /**
  * Extrai os dados de imagem e o tipo MIME de uma requisição Multipart.
  *
- * @return Um objeto [ImageMultipartDTO] contendo os bytes da imagem e o MIME type extraídos.
+ * @return Um objeto [ImageMultipartDTO] contendo os bytes da imagem e o MIME type extraídos dos cabeçalhos do arquivo.
  */
 suspend fun ApplicationCall.extractImageMultipart(): ImageMultipartDTO {
     val multipart = receiveMultipart()
@@ -23,14 +23,7 @@ suspend fun ApplicationCall.extractImageMultipart(): ImageMultipartDTO {
             is PartData.FileItem -> {
                 if (part.name == "image") {
                     imageBytes = part.provider().readRemaining().readByteArray()
-                }
-            }
-            is PartData.FormItem -> {
-                if (part.name == "mimeType") {
-                    val value = part.value.trim()
-                    if (value.isNotBlank()) {
-                        mimeType = value
-                    }
+                    mimeType = part.contentType?.toString()
                 }
             }
             else -> {}
