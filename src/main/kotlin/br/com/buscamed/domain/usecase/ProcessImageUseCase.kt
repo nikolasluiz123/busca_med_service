@@ -2,6 +2,7 @@ package br.com.buscamed.domain.usecase
 
 import br.com.buscamed.domain.exceptions.BusinessException
 import br.com.buscamed.domain.model.LLMExecutionHistory
+import br.com.buscamed.domain.model.enumeration.ExecutionType
 import br.com.buscamed.domain.repository.LLMExecutionHistoryRepository
 import br.com.buscamed.domain.service.ImageStorageService
 import br.com.buscamed.domain.service.LLMImageProcessService
@@ -35,16 +36,30 @@ class ProcessImageUseCase(
      *
      * @param imageBytes O conteúdo da imagem em array de bytes.
      * @param mimeType O tipo MIME da imagem.
+     * @param text O texto extraído da imagem pelo client.
      * @return O resultado processado pela LLM em formato de string JSON.
      * @throws BusinessException Se os bytes da imagem ou o tipo MIME forem nulos.
      */
-    suspend operator fun invoke(imageBytes: ByteArray?, mimeType: String?): String = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(
+        imageBytes: ByteArray?,
+        mimeType: String?,
+        text: String?,
+        clientProcessorVersion: String?
+    ): String = withContext(Dispatchers.IO) {
         if (imageBytes == null) {
-            throw BusinessException("É obrigatório informar uma imagem para processamento")
+            throw BusinessException("É obrigatório informar uma imagem para processamento.")
         }
 
-        if (mimeType == null) {
-            throw BusinessException("É obrigatório informar o tipo de imagem para processamento")
+        if (mimeType.isNullOrBlank()) {
+            throw BusinessException("É obrigatório informar o tipo de imagem para processamento.")
+        }
+
+        if (text.isNullOrBlank()) {
+            throw BusinessException("É obrigatório informar o texto extraído da imagem.")
+        }
+
+        if (clientProcessorVersion.isNullOrEmpty()) {
+            throw BusinessException("É obrigatório informar a versão do pipeline de processamento do client.")
         }
 
         var executionSuccess = true
@@ -67,13 +82,16 @@ class ProcessImageUseCase(
             throw e
         } finally {
             val history = LLMExecutionHistory(
+                type = ExecutionType.IMAGE,
+                inputText = text,
                 inputTokens = inputTokens,
                 outputTokens = outputTokens,
                 result = resultText,
                 success = executionSuccess,
                 startDate = executionStart,
                 endDate = Instant.now(),
-                prompt = prompt
+                prompt = prompt,
+                clientProcessorVersion = clientProcessorVersion
             )
 
             val historyId = executionHistoryRepository.save(history)

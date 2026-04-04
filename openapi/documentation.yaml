@@ -18,7 +18,7 @@ paths:
   /v1/prescription/process/image:
     post:
       summary: Processa a imagem de uma prescrição médica
-      description: Recebe o arquivo de imagem de uma receita médica e extrai os dados estruturados dos medicamentos receitados.
+      description: Recebe o arquivo de imagem de uma receita médica e o texto auxiliar extraído no cliente, e extrai os dados estruturados dos medicamentos receitados priorizando a imagem.
       tags:
         - Prescription
       requestBody:
@@ -28,9 +28,14 @@ paths:
             schema:
               type: object
               required:
+                - text
                 - image
                 - mimeType
               properties:
+                text:
+                  type: string
+                  description: O texto extraído previamente pelo cliente (ex OCR local).
+                  example: "Tomar 1 comprimido de Dipirona 500mg de 8 em 8 horas durante 5 dias."
                 image:
                   type: string
                   format: binary
@@ -47,7 +52,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PrescriptionResponseDTO'
         '400':
-          description: Requisição inválida ou imagem não fornecida
+          description: Requisição inválida, dados ou imagem não fornecidos
           content:
             application/json:
               schema:
@@ -64,15 +69,32 @@ paths:
   /v1/prescription/process/text:
     post:
       summary: Processa o texto de uma prescrição médica
-      description: Recebe o texto contendo uma prescrição médica e extrai os dados estruturados dos medicamentos receitados.
+      description: Recebe o texto contendo uma prescrição médica juntamente com a imagem de origem para backup, extraindo os dados estruturados dos medicamentos baseando-se no texto.
       tags:
         - Prescription
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TextRequestDTO'
+              type: object
+              required:
+                - text
+                - image
+                - mimeType
+              properties:
+                text:
+                  type: string
+                  description: O texto extraído previamente pelo cliente que será processado pela LLM.
+                  example: "Tomar 1 comprimido de Dipirona 500mg de 8 em 8 horas durante 5 dias."
+                image:
+                  type: string
+                  format: binary
+                  description: Arquivo da imagem que originou o texto (para registro histórico).
+                mimeType:
+                  type: string
+                  description: Tipo MIME da imagem (ex. image/jpeg, image/png).
+                  example: "image/jpeg"
       responses:
         '200':
           description: Processamento realizado com sucesso
@@ -155,7 +177,7 @@ paths:
   /v1/pillpack/process/image:
     post:
       summary: Processa a imagem de uma cartela de comprimidos
-      description: Recebe o arquivo de imagem do verso de uma cartela (blister) e extrai o princípio ativo, dosagem e data de validade.
+      description: Recebe o arquivo de imagem do verso de uma cartela e o texto extraído previamente para extrair princípio ativo, dosagem e validade.
       tags:
         - Pill Pack
       requestBody:
@@ -165,9 +187,14 @@ paths:
             schema:
               type: object
               required:
+                - text
                 - image
                 - mimeType
               properties:
+                text:
+                  type: string
+                  description: O texto extraído previamente pelo cliente.
+                  example: "Aspirina 500mg Validade 10/25"
                 image:
                   type: string
                   format: binary
@@ -195,15 +222,32 @@ paths:
   /v1/pillpack/process/text:
     post:
       summary: Processa o texto de uma cartela de comprimidos
-      description: Recebe a transcrição de texto do verso de uma cartela de comprimidos e estrutura os dados.
+      description: Recebe a transcrição de texto do verso de uma cartela de comprimidos e a imagem de backup, estruturando os dados.
       tags:
         - Pill Pack
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TextRequestDTO'
+              type: object
+              required:
+                - text
+                - image
+                - mimeType
+              properties:
+                text:
+                  type: string
+                  description: O texto extraído ou digitado que será processado pela LLM.
+                  example: "Aspirina 500mg Validade 10/25"
+                image:
+                  type: string
+                  format: binary
+                  description: Arquivo da imagem da cartela de medicamentos para registro histórico.
+                mimeType:
+                  type: string
+                  description: Tipo MIME da imagem (ex. image/jpeg, image/png).
+                  example: "image/jpeg"
       responses:
         '200':
           description: Processamento realizado com sucesso
@@ -317,16 +361,6 @@ components:
       description: Falha de autenticação (Token ausente ou inválido)
 
   schemas:
-    TextRequestDTO:
-      type: object
-      required:
-        - text
-      properties:
-        text:
-          type: string
-          description: O texto extraído ou digitado que será processado pela LLM.
-          example: "Tomar 1 comprimido de Dipirona 500mg de 8 em 8 horas durante 5 dias."
-
     ErrorResponseDTO:
       type: object
       properties:
@@ -361,6 +395,15 @@ components:
           nullable: true
           description: Identificador único da execução.
           example: "8f7311f4-3079-4be6-a6fb-96f7c8585c5b"
+        type:
+          type: string
+          description: O tipo de processamento realizado na LLM (IMAGE ou TEXT).
+          example: "IMAGE"
+        inputText:
+          type: string
+          nullable: true
+          description: O texto fornecido como entrada/contexto para a execução.
+          example: "Dipirona 500mg"
         inputTokens:
           type: integer
           description: Quantidade de tokens enviados no prompt.

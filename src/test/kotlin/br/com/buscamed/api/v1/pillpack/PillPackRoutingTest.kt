@@ -1,10 +1,13 @@
+// src/test/kotlin/br/com/buscamed/api/v1/pillpack/PillPackRoutingTest.kt
 package br.com.buscamed.api.v1.pillpack
 
 import br.com.buscamed.core.config.exception.configureStatusPages
 import br.com.buscamed.core.config.security.AuthConstants
 import br.com.buscamed.core.config.serialization.configureSerialization
 import br.com.buscamed.core.enumeration.SupportedImageFormat
+import br.com.buscamed.domain.exceptions.BusinessException
 import br.com.buscamed.domain.model.LLMExecutionHistory
+import br.com.buscamed.domain.model.enumeration.ExecutionType
 import br.com.buscamed.domain.usecase.DownloadImageUseCase
 import br.com.buscamed.domain.usecase.GetLLMExecutionHistoryUseCase
 import br.com.buscamed.domain.usecase.ProcessImageUseCase
@@ -32,13 +35,13 @@ class PillPackRoutingTest {
 
     companion object {
         private const val MOCK_TOKEN = "Bearer mock-token"
-        private const val VALID_JSON_PAYLOAD = """{"text": "Aspirina"}"""
+        private const val MOCK_TEXT = "Aspirina"
         private const val MOCK_LLM_RESPONSE = """{"componentes": []}"""
 
-        private val ENDPOINT_PROCESS_TEXT = "${PillPackRoutes.V1_ROOT}${PillPackRoutes.PROCESS_TEXT}"
-        private val ENDPOINT_PROCESS_IMAGE = "${PillPackRoutes.V1_ROOT}${PillPackRoutes.PROCESS_IMAGE}"
-        private val ENDPOINT_HISTORY = "${PillPackRoutes.V1_ROOT}${PillPackRoutes.HISTORY}"
-        private val ENDPOINT_IMAGE = "${PillPackRoutes.V1_ROOT}${PillPackRoutes.IMAGE}"
+        private const val ENDPOINT_PROCESS_TEXT = "${PillPackRoutes.V1_ROOT}${PillPackRoutes.PROCESS_TEXT}"
+        private const val ENDPOINT_PROCESS_IMAGE = "${PillPackRoutes.V1_ROOT}${PillPackRoutes.PROCESS_IMAGE}"
+        private const val ENDPOINT_HISTORY = "${PillPackRoutes.V1_ROOT}${PillPackRoutes.HISTORY}"
+        private const val ENDPOINT_IMAGE = "${PillPackRoutes.V1_ROOT}${PillPackRoutes.IMAGE}"
     }
 
     private val processImageUseCaseMock = mockk<ProcessImageUseCase>(relaxed = true)
@@ -60,7 +63,16 @@ class PillPackRoutingTest {
     fun getHistory_withAuthentication_returns200() = testApplication {
         application { setupTestEnvironment(simulateAuthSuccess = true) }
         coEvery { getHistoryUseCaseMock.invoke(any()) } returns listOf(
-            LLMExecutionHistory(0, 0, MOCK_LLM_RESPONSE, true, Instant.now(), Instant.now())
+            LLMExecutionHistory(
+                type = ExecutionType.IMAGE,
+                inputText = MOCK_TEXT,
+                inputTokens = 0,
+                outputTokens = 0,
+                result = MOCK_LLM_RESPONSE,
+                success = true,
+                startDate = Instant.now(),
+                endDate = Instant.now()
+            )
         )
 
         val response = client.get(ENDPOINT_HISTORY) {
@@ -72,26 +84,30 @@ class PillPackRoutingTest {
     }
 
     @Test
-    fun postProcessImage_malformedMultipart_returns401() = testApplication {
-        application { setupTestEnvironment(simulateAuthSuccess = false) }
+    fun postProcessImage_malformedMultipart_returnsBadRequest() = testApplication {
+        application { setupTestEnvironment(simulateAuthSuccess = true) }
+        coEvery { processImageUseCaseMock.invoke(any(), any(), any(),) } throws BusinessException("Parâmetros inválidos")
 
-        val response = client.post(ENDPOINT_PROCESS_IMAGE) {
-            contentType(ContentType.Application.Json)
-            setBody("""{"image": "invalid-format"}""")
+        val response = client.submitFormWithBinaryData(
+            url = ENDPOINT_PROCESS_IMAGE,
+            formData = formData {}
+        ) {
+            header(HttpHeaders.Authorization, MOCK_TOKEN)
         }
 
-        assertEquals(HttpStatusCode.Unauthorized, response.status)
-        coVerify(exactly = 0) { processImageUseCaseMock.invoke(any(), any()) }
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        coVerify(exactly = 1) { processImageUseCaseMock.invoke(any(), any(), any(),) }
     }
 
     @Test
     fun postProcessImage_withAuthenticationAndValidPayload_returns200() = testApplication {
         application { setupTestEnvironment(simulateAuthSuccess = true) }
-        coEvery { processImageUseCaseMock.invoke(any(), any()) } returns MOCK_LLM_RESPONSE
+        coEvery { processImageUseCaseMock.invoke(any(), any(), any(),) } returns MOCK_LLM_RESPONSE
 
         val response = client.submitFormWithBinaryData(
             url = ENDPOINT_PROCESS_IMAGE,
             formData = formData {
+                append("text", MOCK_TEXT)
                 append("image", byteArrayOf(1, 2, 3), Headers.build {
                     append(HttpHeaders.ContentType, "image/png")
                     append(HttpHeaders.ContentDisposition, "filename=\"test.png\"")
@@ -103,22 +119,30 @@ class PillPackRoutingTest {
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
-        coVerify(exactly = 1) { processImageUseCaseMock.invoke(any(), any()) }
+        coVerify(exactly = 1) { processImageUseCaseMock.invoke(any(), any(), any(),) }
     }
 
     @Test
     fun postProcessText_withAuthenticationAndValidPayload_returns200() = testApplication {
         application { setupTestEnvironment(simulateAuthSuccess = true) }
-        coEvery { processTextUseCaseMock.invoke(any()) } returns MOCK_LLM_RESPONSE
+        coEvery { processTextUseCaseMock.invoke(any(), any(), any(),) } returns MOCK_LLM_RESPONSE
 
-        val response = client.post(ENDPOINT_PROCESS_TEXT) {
+        val response = client.submitFormWithBinaryData(
+            url = ENDPOINT_PROCESS_TEXT,
+            formData = formData {
+                append("text", MOCK_TEXT)
+                append("image", byteArrayOf(1, 2, 3), Headers.build {
+                    append(HttpHeaders.ContentType, "image/png")
+                    append(HttpHeaders.ContentDisposition, "filename=\"test.png\"")
+                })
+                append("mimeType", "image/png")
+            }
+        ) {
             header(HttpHeaders.Authorization, MOCK_TOKEN)
-            contentType(ContentType.Application.Json)
-            setBody(VALID_JSON_PAYLOAD)
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
-        coVerify(exactly = 1) { processTextUseCaseMock.invoke(any()) }
+        coVerify(exactly = 1) { processTextUseCaseMock.invoke(any(), any(), any(),) }
     }
 
     @Test

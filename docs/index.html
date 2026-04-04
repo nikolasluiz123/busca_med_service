@@ -769,6 +769,17 @@
       "nullable" : true,
       "example" : "8f7311f4-3079-4be6-a6fb-96f7c8585c5b"
     },
+    "type" : {
+      "type" : "string",
+      "description" : "O tipo de processamento realizado na LLM (IMAGE ou TEXT).",
+      "example" : "IMAGE"
+    },
+    "inputText" : {
+      "type" : "string",
+      "description" : "O texto fornecido como entrada/contexto para a execução.",
+      "nullable" : true,
+      "example" : "Dipirona 500mg"
+    },
     "inputTokens" : {
       "type" : "integer",
       "description" : "Quantidade de tokens enviados no prompt.",
@@ -925,17 +936,6 @@
     }
   },
   "description" : "Estrutura retornada pelo Gemini baseada no prompt de prescrição médica."
-};
-            defs["TextRequestDTO"] = {
-  "required" : [ "text" ],
-  "type" : "object",
-  "properties" : {
-    "text" : {
-      "type" : "string",
-      "description" : "O texto extraído ou digitado que será processado pela LLM.",
-      "example" : "Tomar 1 comprimido de Dipirona 500mg de 8 em 8 horas durante 5 dias."
-    }
-  }
 };
             defs["ValueUnitDTO"] = {
   "type" : "object",
@@ -2037,7 +2037,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Recebe o arquivo de imagem do verso de uma cartela (blister) e extrai o princípio ativo, dosagem e data de validade.</p>
+                        <p class="marked">Recebe o arquivo de imagem do verso de uma cartela e o texto extraído previamente para extrair princípio ativo, dosagem e validade.</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/v1/pillpack/process/image</span></code></pre>
@@ -2082,10 +2082,11 @@ public class PillPackApiExample {
 
 
         PillPackApi apiInstance = new PillPackApi();
+        String text = text_example; // String | 
         byte[] image = image_example; // byte[] | 
         String mimeType = mimeType_example; // String | 
         try {
-            PillPackResponseDTO result = apiInstance.v1PillpackProcessImagePost(image, mimeType);
+            PillPackResponseDTO result = apiInstance.v1PillpackProcessImagePost(text, image, mimeType);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PillPackApi#v1PillpackProcessImagePost");
@@ -2102,10 +2103,11 @@ public class PillPackApiExample {
 
     public static void main(String[] args) {
         PillPackApi apiInstance = new PillPackApi();
+        String text = text_example; // String | 
         byte[] image = image_example; // byte[] | 
         String mimeType = mimeType_example; // String | 
         try {
-            PillPackResponseDTO result = apiInstance.v1PillpackProcessImagePost(image, mimeType);
+            PillPackResponseDTO result = apiInstance.v1PillpackProcessImagePost(text, image, mimeType);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PillPackApi#v1PillpackProcessImagePost");
@@ -2120,13 +2122,15 @@ public class PillPackApiExample {
   </div> -->
                             <div class="tab-pane" id="examples-PillPack-v1PillpackProcessImagePost-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
+String *text = text_example; // 
 byte[] *image = image_example; // 
 String *mimeType = mimeType_example; // 
 
 PillPackApi *apiInstance = [[PillPackApi alloc] init];
 
 // Processa a imagem de uma cartela de comprimidos
-[apiInstance v1PillpackProcessImagePostWith:image
+[apiInstance v1PillpackProcessImagePostWith:text
+    image:image
     mimeType:mimeType
               completionHandler: ^(PillPackResponseDTO output, NSError* error) {
                             if (output) {
@@ -2145,6 +2149,7 @@ var defaultClient = BuscaMedApi.ApiClient.instance;
 
 
 var api = new BuscaMedApi.PillPackApi()
+var text = text_example; // {{String}} 
 var image = image_example; // {{byte[]}} 
 var mimeType = mimeType_example; // {{String}} 
 
@@ -2155,7 +2160,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.v1PillpackProcessImagePost(imagemimeType, callback);
+api.v1PillpackProcessImagePost(textimagemimeType, callback);
 </code></pre>
                             </div>
 
@@ -2178,13 +2183,14 @@ namespace Example
 
 
             var apiInstance = new PillPackApi();
+            var text = text_example;  // String | 
             var image = image_example;  // byte[] | 
             var mimeType = mimeType_example;  // String | 
 
             try
             {
                 // Processa a imagem de uma cartela de comprimidos
-                PillPackResponseDTO result = apiInstance.v1PillpackProcessImagePost(image, mimeType);
+                PillPackResponseDTO result = apiInstance.v1PillpackProcessImagePost(text, image, mimeType);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -2203,11 +2209,12 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 
 $api_instance = new Swagger\Client\ApiPillPackApi();
+$text = text_example; // String | 
 $image = image_example; // byte[] | 
 $mimeType = mimeType_example; // String | 
 
 try {
-    $result = $api_instance->v1PillpackProcessImagePost($image, $mimeType);
+    $result = $api_instance->v1PillpackProcessImagePost($text, $image, $mimeType);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling PillPackApi->v1PillpackProcessImagePost: ', $e->getMessage(), PHP_EOL;
@@ -2222,11 +2229,12 @@ use WWW::SwaggerClient::PillPackApi;
 
 
 my $api_instance = WWW::SwaggerClient::PillPackApi->new();
+my $text = text_example; # String | 
 my $image = image_example; # byte[] | 
 my $mimeType = mimeType_example; # String | 
 
 eval { 
-    my $result = $api_instance->v1PillpackProcessImagePost(image => $image, mimeType => $mimeType);
+    my $result = $api_instance->v1PillpackProcessImagePost(text => $text, image => $image, mimeType => $mimeType);
     print Dumper($result);
 };
 if ($@) {
@@ -2244,12 +2252,13 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_client.PillPackApi()
+text = text_example # String | 
 image = image_example # byte[] | 
 mimeType = mimeType_example # String | 
 
 try: 
     # Processa a imagem de uma cartela de comprimidos
-    api_response = api_instance.v1_pillpack_process_image_post(image, mimeType)
+    api_response = api_instance.v1_pillpack_process_image_post(text, image, mimeType)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling PillPackApi->v1PillpackProcessImagePost: %s\n" % e)</code></pre>
@@ -2267,6 +2276,25 @@ except ApiException as e:
                                 <th width="150px">Name</th>
                                 <th>Description</th>
                               </tr>
+                                  <tr><td style="width:150px;">text*</td>
+                                  <td>
+                                  
+                                  
+                                      <div id="d2e199_v1PillpackProcessImagePost_text">
+                                          <div class="json-schema-view">
+                                              <div class="primitive">
+                                                  <span class="type">
+                                                      String
+                                                  </span>
+                                  
+                                              </div>
+                                                  <div class="inner required">
+                                                      Required
+                                                  </div>
+                                          </div>
+                                      </div>
+                                  </td>
+                                  </tr>
                                   <tr><td style="width:150px;">image*</td>
                                   <td>
                                   
@@ -2428,7 +2456,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Recebe a transcrição de texto do verso de uma cartela de comprimidos e estrutura os dados.</p>
+                        <p class="marked">Recebe a transcrição de texto do verso de uma cartela de comprimidos e a imagem de backup, estruturando os dados.</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/v1/pillpack/process/text</span></code></pre>
@@ -2454,7 +2482,7 @@ except ApiException as e:
                            <pre class="prettyprint"><code class="language-bsh">curl -X POST\
  -H "Authorization: Bearer [[accessToken]]"\
 -H "Accept: application/json"\
--H "Content-Type: application/json"\
+-H "Content-Type: multipart/form-data"\
 "https://buscamed-service-7zd5rrmmaq-rj.a.run.app/v1/pillpack/process/text"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-PillPack-v1PillpackProcessTextPost-0-java">
@@ -2473,9 +2501,11 @@ public class PillPackApiExample {
 
 
         PillPackApi apiInstance = new PillPackApi();
-        TextRequestDTO body = ; // TextRequestDTO | 
+        String text = text_example; // String | 
+        byte[] image = image_example; // byte[] | 
+        String mimeType = mimeType_example; // String | 
         try {
-            PillPackResponseDTO result = apiInstance.v1PillpackProcessTextPost(body);
+            PillPackResponseDTO result = apiInstance.v1PillpackProcessTextPost(text, image, mimeType);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PillPackApi#v1PillpackProcessTextPost");
@@ -2492,9 +2522,11 @@ public class PillPackApiExample {
 
     public static void main(String[] args) {
         PillPackApi apiInstance = new PillPackApi();
-        TextRequestDTO body = ; // TextRequestDTO | 
+        String text = text_example; // String | 
+        byte[] image = image_example; // byte[] | 
+        String mimeType = mimeType_example; // String | 
         try {
-            PillPackResponseDTO result = apiInstance.v1PillpackProcessTextPost(body);
+            PillPackResponseDTO result = apiInstance.v1PillpackProcessTextPost(text, image, mimeType);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PillPackApi#v1PillpackProcessTextPost");
@@ -2509,12 +2541,16 @@ public class PillPackApiExample {
   </div> -->
                             <div class="tab-pane" id="examples-PillPack-v1PillpackProcessTextPost-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
-TextRequestDTO *body = ; // 
+String *text = text_example; // 
+byte[] *image = image_example; // 
+String *mimeType = mimeType_example; // 
 
 PillPackApi *apiInstance = [[PillPackApi alloc] init];
 
 // Processa o texto de uma cartela de comprimidos
-[apiInstance v1PillpackProcessTextPostWith:body
+[apiInstance v1PillpackProcessTextPostWith:text
+    image:image
+    mimeType:mimeType
               completionHandler: ^(PillPackResponseDTO output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -2532,7 +2568,9 @@ var defaultClient = BuscaMedApi.ApiClient.instance;
 
 
 var api = new BuscaMedApi.PillPackApi()
-var body = ; // {{TextRequestDTO}} 
+var text = text_example; // {{String}} 
+var image = image_example; // {{byte[]}} 
+var mimeType = mimeType_example; // {{String}} 
 
 var callback = function(error, data, response) {
   if (error) {
@@ -2541,7 +2579,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.v1PillpackProcessTextPost(body, callback);
+api.v1PillpackProcessTextPost(textimagemimeType, callback);
 </code></pre>
                             </div>
 
@@ -2564,12 +2602,14 @@ namespace Example
 
 
             var apiInstance = new PillPackApi();
-            var body = new TextRequestDTO(); // TextRequestDTO | 
+            var text = text_example;  // String | 
+            var image = image_example;  // byte[] | 
+            var mimeType = mimeType_example;  // String | 
 
             try
             {
                 // Processa o texto de uma cartela de comprimidos
-                PillPackResponseDTO result = apiInstance.v1PillpackProcessTextPost(body);
+                PillPackResponseDTO result = apiInstance.v1PillpackProcessTextPost(text, image, mimeType);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -2588,10 +2628,12 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 
 $api_instance = new Swagger\Client\ApiPillPackApi();
-$body = ; // TextRequestDTO | 
+$text = text_example; // String | 
+$image = image_example; // byte[] | 
+$mimeType = mimeType_example; // String | 
 
 try {
-    $result = $api_instance->v1PillpackProcessTextPost($body);
+    $result = $api_instance->v1PillpackProcessTextPost($text, $image, $mimeType);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling PillPackApi->v1PillpackProcessTextPost: ', $e->getMessage(), PHP_EOL;
@@ -2606,10 +2648,12 @@ use WWW::SwaggerClient::PillPackApi;
 
 
 my $api_instance = WWW::SwaggerClient::PillPackApi->new();
-my $body = WWW::SwaggerClient::Object::TextRequestDTO->new(); # TextRequestDTO | 
+my $text = text_example; # String | 
+my $image = image_example; # byte[] | 
+my $mimeType = mimeType_example; # String | 
 
 eval { 
-    my $result = $api_instance->v1PillpackProcessTextPost(body => $body);
+    my $result = $api_instance->v1PillpackProcessTextPost(text => $text, image => $image, mimeType => $mimeType);
     print Dumper($result);
 };
 if ($@) {
@@ -2627,11 +2671,13 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_client.PillPackApi()
-body =  # TextRequestDTO | 
+text = text_example # String | 
+image = image_example # byte[] | 
+mimeType = mimeType_example # String | 
 
 try: 
     # Processa o texto de uma cartela de comprimidos
-    api_response = api_instance.v1_pillpack_process_text_post(body)
+    api_response = api_instance.v1_pillpack_process_text_post(text, image, mimeType)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling PillPackApi->v1PillpackProcessTextPost: %s\n" % e)</code></pre>
@@ -2642,50 +2688,74 @@ except ApiException as e:
 
 
 
-                            <div class="methodsubtabletitle">Body parameters</div>
+
+                            <div class="methodsubtabletitle">Form parameters</div>
                             <table id="methodsubtable">
                               <tr>
                                 <th width="150px">Name</th>
                                 <th>Description</th>
                               </tr>
-                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
-                                <td>
-                                
-                                
-                                <script>
-                                $(document).ready(function() {
-                                  var schemaWrapper = {
-  "content" : {
-    "application/json" : {
-      "schema" : {
-        "$ref" : "#/components/schemas/TextRequestDTO"
-      }
-    }
-  },
-  "required" : true
-};
-                                  var schema = schemaWrapper.content["application/json"].schema;
-                                  if (schema.$ref != null) {
-                                    schema = defsParser.$refs.get(schema.$ref);
-                                  } else {
-                                    schemaWrapper.components = {};
-                                    schemaWrapper.components.schemas = Object.assign({}, defs);
-                                    $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                      console.log(err);
-                                    });
-                                  }
-                                
-                                  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
-                                  var result = $('#d2e199_v1PillpackProcessTextPost_body');
-                                  result.empty();
-                                  result.append(view.render());
-                                });
-                                </script>
-                                <div id="d2e199_v1PillpackProcessTextPost_body"></div>
-                                </td>
-                                </tr>
+                                  <tr><td style="width:150px;">text*</td>
+                                  <td>
+                                  
+                                  
+                                      <div id="d2e199_v1PillpackProcessTextPost_text">
+                                          <div class="json-schema-view">
+                                              <div class="primitive">
+                                                  <span class="type">
+                                                      String
+                                                  </span>
+                                  
+                                              </div>
+                                                  <div class="inner required">
+                                                      Required
+                                                  </div>
+                                          </div>
+                                      </div>
+                                  </td>
+                                  </tr>
+                                  <tr><td style="width:150px;">image*</td>
+                                  <td>
+                                  
+                                  
+                                      <div id="d2e199_v1PillpackProcessTextPost_image">
+                                          <div class="json-schema-view">
+                                              <div class="primitive">
+                                                  <span class="type">
+                                                      byte[]
+                                                  </span>
+                                                      <span class="format">
+                                                          (binary)
+                                                      </span>
+                                  
+                                              </div>
+                                                  <div class="inner required">
+                                                      Required
+                                                  </div>
+                                          </div>
+                                      </div>
+                                  </td>
+                                  </tr>
+                                  <tr><td style="width:150px;">mimeType*</td>
+                                  <td>
+                                  
+                                  
+                                      <div id="d2e199_v1PillpackProcessTextPost_mimeType">
+                                          <div class="json-schema-view">
+                                              <div class="primitive">
+                                                  <span class="type">
+                                                      String
+                                                  </span>
+                                  
+                                              </div>
+                                                  <div class="inner required">
+                                                      Required
+                                                  </div>
+                                          </div>
+                                      </div>
+                                  </td>
+                                  </tr>
                             </table>
-
 
 
                           <h2>Responses</h2>
@@ -3539,7 +3609,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Recebe o arquivo de imagem de uma receita médica e extrai os dados estruturados dos medicamentos receitados.</p>
+                        <p class="marked">Recebe o arquivo de imagem de uma receita médica e o texto auxiliar extraído no cliente, e extrai os dados estruturados dos medicamentos receitados priorizando a imagem.</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/v1/prescription/process/image</span></code></pre>
@@ -3584,10 +3654,11 @@ public class PrescriptionApiExample {
 
 
         PrescriptionApi apiInstance = new PrescriptionApi();
+        String text = text_example; // String | 
         byte[] image = image_example; // byte[] | 
         String mimeType = mimeType_example; // String | 
         try {
-            PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessImagePost(image, mimeType);
+            PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessImagePost(text, image, mimeType);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PrescriptionApi#v1PrescriptionProcessImagePost");
@@ -3604,10 +3675,11 @@ public class PrescriptionApiExample {
 
     public static void main(String[] args) {
         PrescriptionApi apiInstance = new PrescriptionApi();
+        String text = text_example; // String | 
         byte[] image = image_example; // byte[] | 
         String mimeType = mimeType_example; // String | 
         try {
-            PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessImagePost(image, mimeType);
+            PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessImagePost(text, image, mimeType);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PrescriptionApi#v1PrescriptionProcessImagePost");
@@ -3622,13 +3694,15 @@ public class PrescriptionApiExample {
   </div> -->
                             <div class="tab-pane" id="examples-Prescription-v1PrescriptionProcessImagePost-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
+String *text = text_example; // 
 byte[] *image = image_example; // 
 String *mimeType = mimeType_example; // 
 
 PrescriptionApi *apiInstance = [[PrescriptionApi alloc] init];
 
 // Processa a imagem de uma prescrição médica
-[apiInstance v1PrescriptionProcessImagePostWith:image
+[apiInstance v1PrescriptionProcessImagePostWith:text
+    image:image
     mimeType:mimeType
               completionHandler: ^(PrescriptionResponseDTO output, NSError* error) {
                             if (output) {
@@ -3647,6 +3721,7 @@ var defaultClient = BuscaMedApi.ApiClient.instance;
 
 
 var api = new BuscaMedApi.PrescriptionApi()
+var text = text_example; // {{String}} 
 var image = image_example; // {{byte[]}} 
 var mimeType = mimeType_example; // {{String}} 
 
@@ -3657,7 +3732,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.v1PrescriptionProcessImagePost(imagemimeType, callback);
+api.v1PrescriptionProcessImagePost(textimagemimeType, callback);
 </code></pre>
                             </div>
 
@@ -3680,13 +3755,14 @@ namespace Example
 
 
             var apiInstance = new PrescriptionApi();
+            var text = text_example;  // String | 
             var image = image_example;  // byte[] | 
             var mimeType = mimeType_example;  // String | 
 
             try
             {
                 // Processa a imagem de uma prescrição médica
-                PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessImagePost(image, mimeType);
+                PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessImagePost(text, image, mimeType);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -3705,11 +3781,12 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 
 $api_instance = new Swagger\Client\ApiPrescriptionApi();
+$text = text_example; // String | 
 $image = image_example; // byte[] | 
 $mimeType = mimeType_example; // String | 
 
 try {
-    $result = $api_instance->v1PrescriptionProcessImagePost($image, $mimeType);
+    $result = $api_instance->v1PrescriptionProcessImagePost($text, $image, $mimeType);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling PrescriptionApi->v1PrescriptionProcessImagePost: ', $e->getMessage(), PHP_EOL;
@@ -3724,11 +3801,12 @@ use WWW::SwaggerClient::PrescriptionApi;
 
 
 my $api_instance = WWW::SwaggerClient::PrescriptionApi->new();
+my $text = text_example; # String | 
 my $image = image_example; # byte[] | 
 my $mimeType = mimeType_example; # String | 
 
 eval { 
-    my $result = $api_instance->v1PrescriptionProcessImagePost(image => $image, mimeType => $mimeType);
+    my $result = $api_instance->v1PrescriptionProcessImagePost(text => $text, image => $image, mimeType => $mimeType);
     print Dumper($result);
 };
 if ($@) {
@@ -3746,12 +3824,13 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_client.PrescriptionApi()
+text = text_example # String | 
 image = image_example # byte[] | 
 mimeType = mimeType_example # String | 
 
 try: 
     # Processa a imagem de uma prescrição médica
-    api_response = api_instance.v1_prescription_process_image_post(image, mimeType)
+    api_response = api_instance.v1_prescription_process_image_post(text, image, mimeType)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling PrescriptionApi->v1PrescriptionProcessImagePost: %s\n" % e)</code></pre>
@@ -3769,6 +3848,25 @@ except ApiException as e:
                                 <th width="150px">Name</th>
                                 <th>Description</th>
                               </tr>
+                                  <tr><td style="width:150px;">text*</td>
+                                  <td>
+                                  
+                                  
+                                      <div id="d2e199_v1PrescriptionProcessImagePost_text">
+                                          <div class="json-schema-view">
+                                              <div class="primitive">
+                                                  <span class="type">
+                                                      String
+                                                  </span>
+                                  
+                                              </div>
+                                                  <div class="inner required">
+                                                      Required
+                                                  </div>
+                                          </div>
+                                      </div>
+                                  </td>
+                                  </tr>
                                   <tr><td style="width:150px;">image*</td>
                                   <td>
                                   
@@ -3862,7 +3960,7 @@ except ApiException as e:
                                 </div>
                             </div>
 
-                            <h3> Status: 400 - Requisição inválida ou imagem não fornecida </h3>
+                            <h3> Status: 400 - Requisição inválida, dados ou imagem não fornecidos </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -3877,7 +3975,7 @@ except ApiException as e:
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "Requisição inválida ou imagem não fornecida",
+  "description" : "Requisição inválida, dados ou imagem não fornecidos",
   "content" : {
     "application/json" : {
       "schema" : {
@@ -3978,7 +4076,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Recebe o texto contendo uma prescrição médica e extrai os dados estruturados dos medicamentos receitados.</p>
+                        <p class="marked">Recebe o texto contendo uma prescrição médica juntamente com a imagem de origem para backup, extraindo os dados estruturados dos medicamentos baseando-se no texto.</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/v1/prescription/process/text</span></code></pre>
@@ -4004,7 +4102,7 @@ except ApiException as e:
                            <pre class="prettyprint"><code class="language-bsh">curl -X POST\
  -H "Authorization: Bearer [[accessToken]]"\
 -H "Accept: application/json"\
--H "Content-Type: application/json"\
+-H "Content-Type: multipart/form-data"\
 "https://buscamed-service-7zd5rrmmaq-rj.a.run.app/v1/prescription/process/text"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Prescription-v1PrescriptionProcessTextPost-0-java">
@@ -4023,9 +4121,11 @@ public class PrescriptionApiExample {
 
 
         PrescriptionApi apiInstance = new PrescriptionApi();
-        TextRequestDTO body = ; // TextRequestDTO | 
+        String text = text_example; // String | 
+        byte[] image = image_example; // byte[] | 
+        String mimeType = mimeType_example; // String | 
         try {
-            PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessTextPost(body);
+            PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessTextPost(text, image, mimeType);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PrescriptionApi#v1PrescriptionProcessTextPost");
@@ -4042,9 +4142,11 @@ public class PrescriptionApiExample {
 
     public static void main(String[] args) {
         PrescriptionApi apiInstance = new PrescriptionApi();
-        TextRequestDTO body = ; // TextRequestDTO | 
+        String text = text_example; // String | 
+        byte[] image = image_example; // byte[] | 
+        String mimeType = mimeType_example; // String | 
         try {
-            PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessTextPost(body);
+            PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessTextPost(text, image, mimeType);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling PrescriptionApi#v1PrescriptionProcessTextPost");
@@ -4059,12 +4161,16 @@ public class PrescriptionApiExample {
   </div> -->
                             <div class="tab-pane" id="examples-Prescription-v1PrescriptionProcessTextPost-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
-TextRequestDTO *body = ; // 
+String *text = text_example; // 
+byte[] *image = image_example; // 
+String *mimeType = mimeType_example; // 
 
 PrescriptionApi *apiInstance = [[PrescriptionApi alloc] init];
 
 // Processa o texto de uma prescrição médica
-[apiInstance v1PrescriptionProcessTextPostWith:body
+[apiInstance v1PrescriptionProcessTextPostWith:text
+    image:image
+    mimeType:mimeType
               completionHandler: ^(PrescriptionResponseDTO output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -4082,7 +4188,9 @@ var defaultClient = BuscaMedApi.ApiClient.instance;
 
 
 var api = new BuscaMedApi.PrescriptionApi()
-var body = ; // {{TextRequestDTO}} 
+var text = text_example; // {{String}} 
+var image = image_example; // {{byte[]}} 
+var mimeType = mimeType_example; // {{String}} 
 
 var callback = function(error, data, response) {
   if (error) {
@@ -4091,7 +4199,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.v1PrescriptionProcessTextPost(body, callback);
+api.v1PrescriptionProcessTextPost(textimagemimeType, callback);
 </code></pre>
                             </div>
 
@@ -4114,12 +4222,14 @@ namespace Example
 
 
             var apiInstance = new PrescriptionApi();
-            var body = new TextRequestDTO(); // TextRequestDTO | 
+            var text = text_example;  // String | 
+            var image = image_example;  // byte[] | 
+            var mimeType = mimeType_example;  // String | 
 
             try
             {
                 // Processa o texto de uma prescrição médica
-                PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessTextPost(body);
+                PrescriptionResponseDTO result = apiInstance.v1PrescriptionProcessTextPost(text, image, mimeType);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -4138,10 +4248,12 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 
 $api_instance = new Swagger\Client\ApiPrescriptionApi();
-$body = ; // TextRequestDTO | 
+$text = text_example; // String | 
+$image = image_example; // byte[] | 
+$mimeType = mimeType_example; // String | 
 
 try {
-    $result = $api_instance->v1PrescriptionProcessTextPost($body);
+    $result = $api_instance->v1PrescriptionProcessTextPost($text, $image, $mimeType);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling PrescriptionApi->v1PrescriptionProcessTextPost: ', $e->getMessage(), PHP_EOL;
@@ -4156,10 +4268,12 @@ use WWW::SwaggerClient::PrescriptionApi;
 
 
 my $api_instance = WWW::SwaggerClient::PrescriptionApi->new();
-my $body = WWW::SwaggerClient::Object::TextRequestDTO->new(); # TextRequestDTO | 
+my $text = text_example; # String | 
+my $image = image_example; # byte[] | 
+my $mimeType = mimeType_example; # String | 
 
 eval { 
-    my $result = $api_instance->v1PrescriptionProcessTextPost(body => $body);
+    my $result = $api_instance->v1PrescriptionProcessTextPost(text => $text, image => $image, mimeType => $mimeType);
     print Dumper($result);
 };
 if ($@) {
@@ -4177,11 +4291,13 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_client.PrescriptionApi()
-body =  # TextRequestDTO | 
+text = text_example # String | 
+image = image_example # byte[] | 
+mimeType = mimeType_example # String | 
 
 try: 
     # Processa o texto de uma prescrição médica
-    api_response = api_instance.v1_prescription_process_text_post(body)
+    api_response = api_instance.v1_prescription_process_text_post(text, image, mimeType)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling PrescriptionApi->v1PrescriptionProcessTextPost: %s\n" % e)</code></pre>
@@ -4192,50 +4308,74 @@ except ApiException as e:
 
 
 
-                            <div class="methodsubtabletitle">Body parameters</div>
+
+                            <div class="methodsubtabletitle">Form parameters</div>
                             <table id="methodsubtable">
                               <tr>
                                 <th width="150px">Name</th>
                                 <th>Description</th>
                               </tr>
-                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
-                                <td>
-                                
-                                
-                                <script>
-                                $(document).ready(function() {
-                                  var schemaWrapper = {
-  "content" : {
-    "application/json" : {
-      "schema" : {
-        "$ref" : "#/components/schemas/TextRequestDTO"
-      }
-    }
-  },
-  "required" : true
-};
-                                  var schema = schemaWrapper.content["application/json"].schema;
-                                  if (schema.$ref != null) {
-                                    schema = defsParser.$refs.get(schema.$ref);
-                                  } else {
-                                    schemaWrapper.components = {};
-                                    schemaWrapper.components.schemas = Object.assign({}, defs);
-                                    $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                      console.log(err);
-                                    });
-                                  }
-                                
-                                  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
-                                  var result = $('#d2e199_v1PrescriptionProcessTextPost_body');
-                                  result.empty();
-                                  result.append(view.render());
-                                });
-                                </script>
-                                <div id="d2e199_v1PrescriptionProcessTextPost_body"></div>
-                                </td>
-                                </tr>
+                                  <tr><td style="width:150px;">text*</td>
+                                  <td>
+                                  
+                                  
+                                      <div id="d2e199_v1PrescriptionProcessTextPost_text">
+                                          <div class="json-schema-view">
+                                              <div class="primitive">
+                                                  <span class="type">
+                                                      String
+                                                  </span>
+                                  
+                                              </div>
+                                                  <div class="inner required">
+                                                      Required
+                                                  </div>
+                                          </div>
+                                      </div>
+                                  </td>
+                                  </tr>
+                                  <tr><td style="width:150px;">image*</td>
+                                  <td>
+                                  
+                                  
+                                      <div id="d2e199_v1PrescriptionProcessTextPost_image">
+                                          <div class="json-schema-view">
+                                              <div class="primitive">
+                                                  <span class="type">
+                                                      byte[]
+                                                  </span>
+                                                      <span class="format">
+                                                          (binary)
+                                                      </span>
+                                  
+                                              </div>
+                                                  <div class="inner required">
+                                                      Required
+                                                  </div>
+                                          </div>
+                                      </div>
+                                  </td>
+                                  </tr>
+                                  <tr><td style="width:150px;">mimeType*</td>
+                                  <td>
+                                  
+                                  
+                                      <div id="d2e199_v1PrescriptionProcessTextPost_mimeType">
+                                          <div class="json-schema-view">
+                                              <div class="primitive">
+                                                  <span class="type">
+                                                      String
+                                                  </span>
+                                  
+                                              </div>
+                                                  <div class="inner required">
+                                                      Required
+                                                  </div>
+                                          </div>
+                                      </div>
+                                  </td>
+                                  </tr>
                             </table>
-
 
 
                           <h2>Responses</h2>

@@ -199,7 +199,8 @@ fun appModule(environment: ApplicationEnvironment) = module {
     factory(named(DiQualifiers.UC_PROCESS_TEXT_PRESCRIPTION)) {
         ProcessTextUseCase(
             executionHistoryRepository = get(named(DiQualifiers.REPO_MEDICAL_PRESCRIPTION)),
-            llmProcessService = get<GeminiMedicalPrescriptionTextProcessClient>()
+            llmProcessService = get<GeminiMedicalPrescriptionTextProcessClient>(),
+            storageService = get<MedicalPrescriptionGoogleStorageClient>()
         )
     }
 
@@ -220,7 +221,8 @@ fun appModule(environment: ApplicationEnvironment) = module {
     factory(named(DiQualifiers.UC_PROCESS_TEXT_PILL_PACK)) {
         ProcessTextUseCase(
             executionHistoryRepository = get(named(DiQualifiers.REPO_PILL_PACK)),
-            llmProcessService = get<GeminiPillPackTextProcessClient>()
+            llmProcessService = get<GeminiPillPackTextProcessClient>(),
+            storageService = get<PillPackGoogleStorageClient>()
         )
     }
 

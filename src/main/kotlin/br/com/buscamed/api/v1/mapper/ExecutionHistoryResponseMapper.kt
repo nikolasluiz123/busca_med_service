@@ -3,12 +3,11 @@ package br.com.buscamed.api.v1.mapper
 import br.com.buscamed.api.v1.dto.response.LLMExecutionHistoryResponseDTO
 import br.com.buscamed.domain.model.LLMExecutionHistory
 
-/**
- * Converte a entidade de domínio [LLMExecutionHistory] em um DTO de resposta para a API.
- */
 fun LLMExecutionHistory.toDTO(): LLMExecutionHistoryResponseDTO {
     return LLMExecutionHistoryResponseDTO(
         id = id,
+        type = type.name,
+        inputText = inputText,
         inputTokens = inputTokens,
         outputTokens = outputTokens,
         result = result,

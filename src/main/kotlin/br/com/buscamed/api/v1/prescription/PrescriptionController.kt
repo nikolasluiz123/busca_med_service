@@ -1,8 +1,7 @@
 package br.com.buscamed.api.v1.prescription
 
-import br.com.buscamed.api.v1.dto.request.TextRequestDTO
 import br.com.buscamed.api.v1.dto.response.PrescriptionResponseDTO
-import br.com.buscamed.api.v1.extension.extractImageMultipart
+import br.com.buscamed.api.v1.extension.extractTextAndImageMultipart
 import br.com.buscamed.api.v1.mapper.toDTO
 import br.com.buscamed.core.config.serialization.DefaultJson
 import br.com.buscamed.domain.exceptions.BusinessException
@@ -13,7 +12,6 @@ import br.com.buscamed.domain.usecase.ProcessImageUseCase
 import br.com.buscamed.domain.usecase.ProcessTextUseCase
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import java.time.Instant
 import java.time.format.DateTimeParseException
@@ -22,8 +20,8 @@ import java.time.format.DateTimeParseException
  * Controlador responsável por orquestrar as requisições relacionadas ao processamento de
  * imagens e textos de prescrições médicas (receitas).
  *
- * @property processImageUseCase Caso de uso para processar imagens.
- * @property processTextUseCase Caso de uso para processar textos brutos.
+ * @property processImageUseCase Caso de uso para processar imagens diretamente na LLM.
+ * @property processTextUseCase Caso de uso para processar textos brutos na LLM.
  * @property getHistoryUseCase Caso de uso para recuperar o histórico de processamentos.
  * @property downloadImageUseCase Caso de uso para realizar o download da imagem original do storage.
  */
@@ -35,31 +33,38 @@ class PrescriptionController(
 ) {
 
     /**
-     * Processa a requisição multipart contendo a imagem de uma prescrição médica.
-     * Extrai a imagem, envia para processamento e retorna os dados estruturados.
+     * Processa a requisição multipart enviando a imagem como contexto principal para a LLM.
      *
      * @param call O contexto da requisição Ktor.
      */
     suspend fun processImage(call: ApplicationCall) {
-        val multipartData = call.extractImageMultipart()
-        val imageBytes = multipartData.imageBytes
-        val mimeType = multipartData.mimeType
+        val multipartData = call.extractTextAndImageMultipart()
 
-        val resultJsonString = processImageUseCase(imageBytes, mimeType)
+        val resultJsonString = processImageUseCase(
+            imageBytes = multipartData.imageBytes,
+            mimeType = multipartData.mimeType,
+            text = multipartData.text,
+            clientProcessorVersion = multipartData.pipelineVersion
+        )
         val responseDTO = DefaultJson.decodeFromString<PrescriptionResponseDTO>(resultJsonString)
 
         call.respond(HttpStatusCode.OK, responseDTO)
     }
 
     /**
-     * Processa a requisição contendo texto bruto extraído de uma prescrição médica.
-     * Envia o texto para processamento e retorna os dados estruturados.
+     * Processa a requisição multipart enviando o texto como contexto principal para a LLM.
      *
      * @param call O contexto da requisição Ktor.
      */
     suspend fun processText(call: ApplicationCall) {
-        val request = call.receive<TextRequestDTO>()
-        val resultJsonString = processTextUseCase(request.text)
+        val multipartData = call.extractTextAndImageMultipart()
+
+        val resultJsonString = processTextUseCase(
+            text = multipartData.text,
+            imageBytes = multipartData.imageBytes,
+            mimeType = multipartData.mimeType,
+            clientProcessorVersion = multipartData.pipelineVersion
+        )
         val responseDTO = DefaultJson.decodeFromString<PrescriptionResponseDTO>(resultJsonString)
 
         call.respond(HttpStatusCode.OK, responseDTO)

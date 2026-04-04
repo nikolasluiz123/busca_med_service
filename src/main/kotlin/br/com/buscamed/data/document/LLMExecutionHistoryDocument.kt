@@ -9,6 +9,8 @@ import java.time.Instant
 data class LLMExecutionHistoryDocument(
     @DocumentId
     override val id: String? = null,
+    val type: String = "",
+    val inputText: String = "",
     val inputTokens: Int = 0,
     val outputTokens: Int = 0,
     val result: String? = null,
@@ -18,5 +20,6 @@ data class LLMExecutionHistoryDocument(
     @Serializable(with = InstantSerializer::class)
     val endDate: Instant = Instant.now(),
     val storageImagePath: String? = null,
-    val prompt: String = ""
+    val prompt: String = "",
+    val clientProcessorVersion: String = ""
 ) : FirestoreDocument
