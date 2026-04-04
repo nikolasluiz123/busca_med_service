@@ -18,6 +18,7 @@ import java.time.Instant
  * @property storageImagePath Opcional. Caminho do arquivo original, como imagem no Storage.
  * @property prompt O identificador ou versão do prompt que foi utilizado.
  * @property clientProcessorVersion Versão do pipeline de processamento do client
+ * @property llmModel O modelo de LLM que foi utilizado (ex: gemini-2.5-flash-lite).
  */
 data class LLMExecutionHistory(
     val type: ExecutionType,
@@ -31,5 +32,6 @@ data class LLMExecutionHistory(
     val id: String? = null,
     val storageImagePath: String? = null,
     val prompt: String = "",
-    val clientProcessorVersion: String = ""
+    val clientProcessorVersion: String = "",
+    val llmModel: String
 )

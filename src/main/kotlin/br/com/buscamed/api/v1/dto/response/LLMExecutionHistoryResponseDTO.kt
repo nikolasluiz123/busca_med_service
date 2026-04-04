@@ -16,6 +16,8 @@ import kotlinx.serialization.Serializable
  * @property endDate Data e hora de término da execução (formato ISO-8601).
  * @property storageImagePath Caminho do arquivo de imagem salvo no storage.
  * @property prompt Nome do arquivo ou versão do prompt utilizado.
+ * @property clientProcessorVersion Versão do pipeline de processamento do client.
+ * @property llmModel O modelo de LLM que foi utilizado (ex: gemini-2.5-flash-lite).
  */
 @Serializable
 data class LLMExecutionHistoryResponseDTO(
@@ -30,5 +32,6 @@ data class LLMExecutionHistoryResponseDTO(
     val endDate: String,
     val storageImagePath: String?,
     val prompt: String,
-    val clientProcessorVersion: String = ""
+    val clientProcessorVersion: String = "",
+    val llmModel: String
 )

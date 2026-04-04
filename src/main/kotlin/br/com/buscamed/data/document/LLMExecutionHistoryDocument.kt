@@ -21,5 +21,6 @@ data class LLMExecutionHistoryDocument(
     val endDate: Instant = Instant.now(),
     val storageImagePath: String? = null,
     val prompt: String = "",
-    val clientProcessorVersion: String = ""
+    val clientProcessorVersion: String = "",
+    val llmModel: String = ""
 ) : FirestoreDocument

@@ -85,7 +85,8 @@ abstract class GeminiProcessClient(
                 resultText = jsonElement.toString(),
                 inputTokens = inputTokens,
                 outputTokens = outputTokens,
-                promptName = getFullPromptFileName()
+                promptName = getFullPromptFileName(),
+                llmModel = modelId
             )
         } else {
             throw GeminiIntegrationException(

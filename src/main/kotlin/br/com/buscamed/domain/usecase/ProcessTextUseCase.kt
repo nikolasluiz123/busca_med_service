@@ -65,6 +65,7 @@ class ProcessTextUseCase(
         var outputTokens = 0
         var resultText = "{}"
         var prompt = ""
+        var llmModel = ""
 
         try {
             val llmResult = llmProcessService.process(text)
@@ -72,6 +73,7 @@ class ProcessTextUseCase(
             outputTokens = llmResult.outputTokens
             resultText = llmResult.resultText
             prompt = llmResult.promptName
+            llmModel = llmResult.llmModel
 
             resultText
         } catch (e: Exception) {
@@ -88,7 +90,8 @@ class ProcessTextUseCase(
                 startDate = executionStart,
                 endDate = Instant.now(),
                 prompt = prompt,
-                clientProcessorVersion = clientProcessorVersion
+                clientProcessorVersion = clientProcessorVersion,
+                llmModel = llmModel
             )
 
             val historyId = executionHistoryRepository.save(history)

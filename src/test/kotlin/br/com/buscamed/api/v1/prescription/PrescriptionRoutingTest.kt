@@ -66,13 +66,13 @@ class PrescriptionRoutingTest {
         )
 
         assertEquals(HttpStatusCode.Unauthorized, response.status)
-        coVerify(exactly = 0) { processTextUseCaseMock.invoke(any(), any(), any(),) }
+        coVerify(exactly = 0) { processTextUseCaseMock.invoke(any(), any(), any(), any()) }
     }
 
     @Test
     fun postProcessText_withAuthenticationAndValidPayload_returns200() = testApplication {
         application { setupTestEnvironment(simulateAuthSuccess = true) }
-        coEvery { processTextUseCaseMock.invoke(any(), any(), any(),) } returns MOCK_LLM_RESPONSE
+        coEvery { processTextUseCaseMock.invoke(any(), any(), any(), any()) } returns MOCK_LLM_RESPONSE
 
         val response = client.submitFormWithBinaryData(
             url = ENDPOINT_PROCESS_TEXT,
@@ -89,13 +89,13 @@ class PrescriptionRoutingTest {
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
-        coVerify(exactly = 1) { processTextUseCaseMock.invoke(any(), any(), any(),) }
+        coVerify(exactly = 1) { processTextUseCaseMock.invoke(any(), any(), any(), any()) }
     }
 
     @Test
     fun postProcessText_invalidPayload_returnsBadRequest() = testApplication {
         application { setupTestEnvironment(simulateAuthSuccess = true) }
-        coEvery { processTextUseCaseMock.invoke(any(), any(), any(),) } throws BusinessException("Parâmetros inválidos")
+        coEvery { processTextUseCaseMock.invoke(any(), any(), any(), any()) } throws BusinessException("Parâmetros inválidos")
 
         val response = client.submitFormWithBinaryData(
             url = ENDPOINT_PROCESS_TEXT,
@@ -105,13 +105,13 @@ class PrescriptionRoutingTest {
         }
 
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        coVerify(exactly = 1) { processTextUseCaseMock.invoke(any(), any(), any(),) }
+        coVerify(exactly = 1) { processTextUseCaseMock.invoke(any(), any(), any(), any()) }
     }
 
     @Test
     fun postProcessImage_withAuthenticationAndValidPayload_returns200() = testApplication {
         application { setupTestEnvironment(simulateAuthSuccess = true) }
-        coEvery { processImageUseCaseMock.invoke(any(), any(), any(),) } returns MOCK_LLM_RESPONSE
+        coEvery { processImageUseCaseMock.invoke(any(), any(), any(), any()) } returns MOCK_LLM_RESPONSE
 
         val response = client.submitFormWithBinaryData(
             url = ENDPOINT_PROCESS_IMAGE,
@@ -128,7 +128,7 @@ class PrescriptionRoutingTest {
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
-        coVerify(exactly = 1) { processImageUseCaseMock.invoke(any(), any(), any(),) }
+        coVerify(exactly = 1) { processImageUseCaseMock.invoke(any(), any(), any(), any()) }
     }
 
     @Test
@@ -143,7 +143,8 @@ class PrescriptionRoutingTest {
                 result = MOCK_LLM_RESPONSE,
                 success = true,
                 startDate = Instant.now(),
-                endDate = Instant.now()
+                endDate = Instant.now(),
+                llmModel = "gemini-2.5-flash-lite"
             )
         )
 

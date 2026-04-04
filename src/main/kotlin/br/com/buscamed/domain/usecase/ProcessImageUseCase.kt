@@ -68,6 +68,7 @@ class ProcessImageUseCase(
         var outputTokens = 0
         var resultText = "{}"
         var prompt = ""
+        var llmModel = ""
 
         try {
             val llmResult = llmProcessService.process(imageBytes, mimeType)
@@ -75,6 +76,7 @@ class ProcessImageUseCase(
             outputTokens = llmResult.outputTokens
             resultText = llmResult.resultText
             prompt = llmResult.promptName
+            llmModel = llmResult.llmModel
 
             resultText
         } catch (e: Exception) {
@@ -91,7 +93,8 @@ class ProcessImageUseCase(
                 startDate = executionStart,
                 endDate = Instant.now(),
                 prompt = prompt,
-                clientProcessorVersion = clientProcessorVersion
+                clientProcessorVersion = clientProcessorVersion,
+                llmModel = llmModel
             )
 
             val historyId = executionHistoryRepository.save(history)
