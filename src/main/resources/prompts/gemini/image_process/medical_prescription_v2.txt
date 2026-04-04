@@ -1,0 +1,8 @@
+Extraia as informações da prescrição médica presente na imagem.
+
+Regras de Extração e Negócio:
+1. Múltiplos Medicamentos e Compostos: Caso a imagem contenha múltiplos medicamentos ou medicamentos compostos descritos na mesma linha (ex: "AMOXICILINA + CLAVULANATO 875 + 125 MG"), separe-os obrigatoriamente em objetos distintos na lista "medicamentos". Associe a dosagem respectiva a cada princípio ativo e replique as regras de dose, frequência e duração para todos os itens do composto.
+2. Informações Ausentes: Se qualquer informação estiver ilegível, cortada ou ausente, defina o valor do respectivo campo como nulo. Não invente informações.
+3. Padronização de Unidades: Você deve interpretar abreviações e símbolos (ex: mg, g, cp, caps, cx) e traduzi-los estritamente para a palavra equivalente permitida no formato esperado. Se não houver correspondência, retorne nulo.
+4. Frequência e Orientação: Se a instrução de uso for baseada em tempo exato (ex: "de 12 em 12 horas"), preencha o intervalo e a unidade adequados. Se a instrução for situacional (ex: "após o almoço", "se tiver febre"), preencha o intervalo e a unidade como nulos e insira a instrução original no campo de texto de orientação.
+5. Duração e Uso Contínuo: Se a prescrição indicar "uso contínuo", "uso prolongado" ou equivalente, marque a propriedade "uso_continuo" como verdadeira e os valores numéricos de tempo como nulos.

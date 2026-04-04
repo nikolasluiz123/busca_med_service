@@ -8,6 +8,7 @@ import br.com.buscamed.domain.model.LLMProcessResult
 import com.google.genai.Client
 import com.google.genai.types.GenerateContentConfig
 import com.google.genai.types.GenerateContentResponse
+import com.google.genai.types.Schema
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
@@ -28,6 +29,14 @@ abstract class GeminiProcessClient(
      * caso o processamento da LLM falhe de uma maneira inesperada.
      */
     protected abstract fun getUserFailureGenericMessage(): String
+
+    /**
+     * Retorna o schema estruturado esperado para a resposta da LLM.
+     * Pode ser sobrescrito pelas classes filhas para forçar um formato específico.
+     *
+     * @return O [Schema] esperado ou null se não houver restrição.
+     */
+    protected open fun getResponseSchema(): Schema? = null
 
     /**
      * Constrói e retorna uma instância do cliente Gemini configurado para usar Vertex AI.
@@ -51,10 +60,15 @@ abstract class GeminiProcessClient(
      * @return Um objeto [GenerateContentConfig] configurado.
      */
     protected fun getGenerationConfig(): GenerateContentConfig {
-        return GenerateContentConfig.builder()
+        val builder = GenerateContentConfig.builder()
             .responseMimeType("application/json")
             .temperature(0.0f)
-            .build()
+
+        getResponseSchema()?.let { schema ->
+            builder.responseSchema(schema)
+        }
+
+        return builder.build()
     }
 
     /**
