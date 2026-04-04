@@ -15,6 +15,7 @@ fun LLMExecutionHistory.toDTO(): LLMExecutionHistoryResponseDTO {
         startDate = startDate.toString(),
         endDate = endDate.toString(),
         storageImagePath = storageImagePath,
-        prompt = prompt
+        prompt = prompt,
+        clientProcessorVersion = clientProcessorVersion
     )
 }
