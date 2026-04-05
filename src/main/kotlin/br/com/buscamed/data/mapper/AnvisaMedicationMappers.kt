@@ -6,6 +6,7 @@ import br.com.buscamed.domain.model.anvisa.AnvisaMedication
 fun AnvisaMedication.toDocument(): AnvisaMedicationDocument {
     return AnvisaMedicationDocument(
         id = this.ggremCode,
+        registerNumber = registerNumber,
         activeIngredients = this.activeIngredients,
         cnpj = this.cnpj,
         laboratory = this.laboratory,

@@ -34,7 +34,7 @@ class ApacheCommonsAnvisaCsvParser : AnvisaCsvParser {
         val printer = CSVPrinter(writer, csvFormat)
 
         printer.printRecord(
-            "CODIGO_GGREM", "SUBSTANCIA", "CNPJ", "LABORATORIO", "EAN_1", "EAN_2", "EAN_3",
+            "CODIGO_GGREM", "REGISTRO", "SUBSTANCIA", "CNPJ", "LABORATORIO", "EAN_1", "EAN_2", "EAN_3",
             "PRODUTO", "APRESENTACAO", "CLASSE_TERAPEUTICA", "TIPO_PRODUTO",
             "RESTRICAO_HOSPITALAR", "TARJA"
         )
@@ -62,6 +62,7 @@ class ApacheCommonsAnvisaCsvParser : AnvisaCsvParser {
 
                 if (ggremCode.isEmpty()) continue
 
+                val registerNumber = getColumnValue(record, headerMap, "REGISTRO")
                 val rawActiveIngredients = getColumnValue(record, headerMap, "SUBSTÂNCIA")
                 val cnpj = getColumnValue(record, headerMap, "CNPJ")
                 val laboratory = getColumnValue(record, headerMap, "LABORATÓRIO")
@@ -85,6 +86,7 @@ class ApacheCommonsAnvisaCsvParser : AnvisaCsvParser {
 
                 val medication = AnvisaMedication(
                     ggremCode = ggremCode,
+                    registerNumber = registerNumber,
                     activeIngredients = activeIngredientsList,
                     cnpj = cnpj,
                     laboratory = laboratory,
@@ -103,6 +105,7 @@ class ApacheCommonsAnvisaCsvParser : AnvisaCsvParser {
 
                 printer.printRecord(
                     ggremCode,
+                    registerNumber,
                     rawActiveIngredients,
                     cnpj,
                     laboratory,

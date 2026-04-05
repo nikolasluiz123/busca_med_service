@@ -7,6 +7,7 @@ import br.com.buscamed.domain.model.anvisa.enumeration.MedicationStripe
  * Entidade de domínio que representa um medicamento processado a partir dos dados abertos da ANVISA.
  *
  * @property ggremCode Código GGREM único da apresentação do medicamento.
+ * @property registerNumber Número de registro na ANVISA.
  * @property activeIngredients Lista de princípios ativos que compõem o medicamento.
  * @property cnpj CNPJ do laboratório responsável.
  * @property laboratory Nome do laboratório produtor ou importador.
@@ -22,6 +23,7 @@ import br.com.buscamed.domain.model.anvisa.enumeration.MedicationStripe
  */
 data class AnvisaMedication(
     val ggremCode: String,
+    val registerNumber: String,
     val activeIngredients: List<String>,
     val cnpj: String,
     val laboratory: String,

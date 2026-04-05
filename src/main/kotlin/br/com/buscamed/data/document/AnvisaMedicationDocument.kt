@@ -9,6 +9,7 @@ import com.google.cloud.firestore.annotation.DocumentId
 data class AnvisaMedicationDocument(
     @DocumentId
     override val id: String? = null,
+    val registerNumber: String = "",
     val activeIngredients: List<String> = emptyList(),
     val cnpj: String = "",
     val laboratory: String = "",
