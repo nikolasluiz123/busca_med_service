@@ -1,4 +1,4 @@
-package br.com.buscamed.data.client.gemini.core.prescription
+package br.com.buscamed.data.client.gemini.core.schema
 
 import br.com.buscamed.data.client.gemini.core.extensions.*
 import com.google.genai.types.Schema

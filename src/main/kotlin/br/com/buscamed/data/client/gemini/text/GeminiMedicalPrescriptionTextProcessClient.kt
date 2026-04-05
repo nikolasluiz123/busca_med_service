@@ -2,7 +2,7 @@ package br.com.buscamed.data.client.gemini.text
 
 import br.com.buscamed.core.config.properties.GeminiConfig
 import br.com.buscamed.data.client.gemini.core.client.GeminiTextProcessClient
-import br.com.buscamed.data.client.gemini.core.prescription.MedicalPrescriptionSchemaFactory
+import br.com.buscamed.data.client.gemini.core.schema.MedicalPrescriptionSchemaFactory
 import com.google.genai.types.Schema
 
 class GeminiMedicalPrescriptionTextProcessClient(config: GeminiConfig): GeminiTextProcessClient(config) {

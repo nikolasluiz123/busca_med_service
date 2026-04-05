@@ -1,0 +1,9 @@
+Extraia as informações da cartela de comprimidos a partir das informações fornecidas.
+
+Regras de Extração e Negócio:
+1. Data de Validade e Lote: A data de validade é a informação mais crítica. Busque por padrões indicativos próximos a "Val", "V", "Exp" ou datas (ex: 10/25, OUT 2026).
+2. Nome e Componentes: Se o texto exibir um nome comercial explícito, associe-o ao nome do medicamento e liste os princípios ativos como componentes. Se for um medicamento genérico, utilize a mesma nomenclatura para o nome do medicamento e para o princípio ativo.
+3. Dosagem e Padronização: Separe o valor numérico da unidade de medida correspondente. O valor da dosagem deve conter estritamente a grandeza numérica. A unidade de medida deve ser obrigatoriamente convertida de siglas/abreviações para a palavra por extenso correspondente permitida (ex: "mg" para "Miligrama", "g" para "Grama").
+4. Correção de Ruídos (OCR): Aplique correções a erros evidentes de digitalização ou reflexo de imagem (ex: interpretar "500 nq" como "500 mg", "cIorfeniramina" como "clorfeniramina") antes de associar os dados.
+5. Vias e Indicações: Extraia menções literais referentes à via de administração, restrições etárias ou sintomas que o medicamento se propõe a aliviar.
+6. Ausência de Informação: Não invente, deduza ou realize pesquisas em fontes externas para colmatar dados não visíveis. Qualquer informação ilegível ou inexistente deve ser classificada como nula.
