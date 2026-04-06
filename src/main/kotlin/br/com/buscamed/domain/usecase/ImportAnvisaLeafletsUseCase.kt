@@ -28,7 +28,7 @@ class ImportAnvisaLeafletsUseCase(
     private val processId = "ANVISA_LEAFLET_IMPORT"
 
     suspend operator fun invoke() = withContext(Dispatchers.IO) {
-        val medications = repository.findPendingLeaflets(50)
+        val medications = repository.findPendingLeaflets(10)
 
         logger.info("${medications.size} medicamentos retornados e serão processados.")
 
