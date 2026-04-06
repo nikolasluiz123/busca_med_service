@@ -117,7 +117,18 @@ fun appModule(environment: ApplicationEnvironment) = module {
         HttpClientFactory.createClient(
             connectTimeoutMillis = 120_000,
             requestTimeoutMillis = 240_000,
-            socketTimeoutMillis = 120_000
+            socketTimeoutMillis = 120_000,
+            extraConfig = {
+                engine {
+                    https {
+                        trustManager = object : javax.net.ssl.X509TrustManager {
+                            override fun checkClientTrusted(p0: Array<out java.security.cert.X509Certificate>?, p1: String?) {}
+                            override fun checkServerTrusted(p0: Array<out java.security.cert.X509Certificate>?, p1: String?) {}
+                            override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate>? = null
+                        }
+                    }
+                }
+            }
         )
     }
 
