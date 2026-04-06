@@ -6,5 +6,6 @@ object FirestoreSchema {
     const val RECORDS_COLLECTION = "records"
     const val PILL_PACK_COLLECTION = "pillPack"
     const val ANVISA_MEDICATIONS_COLLECTION = "anvisaMedications"
+    const val ANVISA_MEDICATIONS_LEAFLET_COLLECTION = "leaflets"
     const val SYSTEM_PROCESS_CONTROL_COLLECTION = "systemProcessControl"
 }

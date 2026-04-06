@@ -5,5 +5,6 @@ package br.com.buscamed.api.v1.anvisa
  */
 object AnvisaRoutes {
     const val V1_ROOT = "/v1/anvisa"
-    const val IMPORT = "/import"
+    const val IMPORT_MEDICATIONS = "/import/medications"
+    const val IMPORT_LEAFLET = "/import/leaflet"
 }

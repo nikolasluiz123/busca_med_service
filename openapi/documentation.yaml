@@ -327,7 +327,7 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
-  /v1/anvisa/import:
+  /v1/anvisa/import/medications:
     post:
       summary: Dispara a sincronização de medicamentos da ANVISA
       description: Inicia o download, processamento do CSV da ANVISA e atualização (upsert) dos dados no banco Firestore.
@@ -340,6 +340,24 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '502':
           description: Erro na integração com o portal de dados abertos da ANVISA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+
+  /v1/anvisa/import/leaflet:
+    post:
+      summary: Dispara a sincronização de bulas da ANVISA
+      description: Inicia a consulta e o download em PDF das bulas (paciente e profissional) dos medicamentos pendentes na base.
+      tags:
+        - Anvisa
+      responses:
+        '202':
+          description: Processamento assíncrono aceito e iniciado
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '502':
+          description: Erro na integração com a API da ANVISA
           content:
             application/json:
               schema:

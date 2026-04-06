@@ -15,8 +15,12 @@ fun Route.anvisaRoutes() {
 
     route(AnvisaRoutes.V1_ROOT) {
         authenticate(AuthConstants.AUTH_GOOGLE_OIDC_NAME) {
-            post(AnvisaRoutes.IMPORT) {
+            post(AnvisaRoutes.IMPORT_MEDICATIONS) {
                 controller.importInformation(call)
+            }
+
+            post(AnvisaRoutes.IMPORT_LEAFLET) {
+                controller.importLeaflets(call)
             }
         }
     }

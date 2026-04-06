@@ -13,6 +13,7 @@ import br.com.buscamed.data.client.gemini.text.GeminiPillPackTextProcessClient
 import br.com.buscamed.data.client.storage.google.csv.AnvisaCsvGoogleStorageClient
 import br.com.buscamed.data.client.storage.google.image.MedicalPrescriptionGoogleStorageClient
 import br.com.buscamed.data.client.storage.google.image.PillPackGoogleStorageClient
+import br.com.buscamed.data.client.storage.google.pdf.AnvisaLeafletPDFGoogleStorageClient
 import br.com.buscamed.data.datasource.FirestoreAnvisaMedicationDataSource
 import br.com.buscamed.data.datasource.FirestoreMedicalPrescriptionExecutionHistoryDataSource
 import br.com.buscamed.data.datasource.FirestorePillPackExecutionHistoryDataSource
@@ -31,6 +32,7 @@ import br.com.buscamed.domain.repository.LLMExecutionHistoryRepository
 import br.com.buscamed.domain.repository.SystemProcessControlRepository
 import br.com.buscamed.domain.service.AnvisaIntegrationService
 import br.com.buscamed.domain.service.CsvStorageService
+import br.com.buscamed.domain.service.LeafletStorageService
 import br.com.buscamed.domain.usecase.*
 import com.google.cloud.firestore.Firestore
 import com.google.cloud.firestore.FirestoreOptions
@@ -158,6 +160,8 @@ fun appModule(environment: ApplicationEnvironment) = module {
     single { MedicalPrescriptionGoogleStorageClient(storage = get()) }
     single { PillPackGoogleStorageClient(storage = get()) }
     single<CsvStorageService> { AnvisaCsvGoogleStorageClient(storage = get()) }
+    single<CsvStorageService> { AnvisaCsvGoogleStorageClient(storage = get()) }
+    single<LeafletStorageService> { AnvisaLeafletPDFGoogleStorageClient(storage = get()) }
 
     single { GeminiMedicalPrescriptionImageProcessClient(config = get()) }
     single { GeminiPillPackImageProcessClient(config = get()) }
@@ -261,8 +265,18 @@ fun appModule(environment: ApplicationEnvironment) = module {
     }
 
     factory {
+        ImportAnvisaLeafletsUseCase(
+            repository = get(),
+            anvisaService = get(),
+            storageService = get(),
+            processControlRepository = get()
+        )
+    }
+
+    factory {
         AnvisaController(
-            importAnvisaInformationUseCase = get()
+            importAnvisaInformationUseCase = get(),
+            importAnvisaLeafletsUseCase = get()
         )
     }
 }

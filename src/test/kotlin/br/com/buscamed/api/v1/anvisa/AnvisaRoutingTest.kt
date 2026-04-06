@@ -9,7 +9,9 @@ import br.com.buscamed.domain.repository.AnvisaMedicationRepository
 import br.com.buscamed.domain.repository.SystemProcessControlRepository
 import br.com.buscamed.domain.service.AnvisaIntegrationService
 import br.com.buscamed.domain.service.CsvStorageService
+import br.com.buscamed.domain.service.LeafletStorageService
 import br.com.buscamed.domain.usecase.ImportAnvisaInformationUseCase
+import br.com.buscamed.domain.usecase.ImportAnvisaLeafletsUseCase
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -31,23 +33,30 @@ class AnvisaRoutingTest {
 
     companion object {
         private const val MOCK_TOKEN = "Bearer mock-token-valido"
-        private val ENDPOINT_IMPORT = "${AnvisaRoutes.V1_ROOT}${AnvisaRoutes.IMPORT}"
+        private const val ENDPOINT_IMPORT = "${AnvisaRoutes.V1_ROOT}${AnvisaRoutes.IMPORT_MEDICATIONS}"
     }
 
     private val integrationServiceMock = mockk<AnvisaIntegrationService>(relaxed = true)
     private val csvParserMock = mockk<AnvisaCsvParser>(relaxed = true)
     private val medicationRepositoryMock = mockk<AnvisaMedicationRepository>(relaxed = true)
-    private val storageServiceMock = mockk<CsvStorageService>(relaxed = true)
+    private val csvStorageService = mockk<CsvStorageService>(relaxed = true)
+    private val leafletStorageService = mockk<LeafletStorageService>(relaxed = true)
     private val processControlRepositoryMock = mockk<SystemProcessControlRepository>(relaxed = true)
 
-    private val importUseCase = ImportAnvisaInformationUseCase(
+    private val importAnvisaInformationUseCase = ImportAnvisaInformationUseCase(
         integrationService = integrationServiceMock,
         csvParser = csvParserMock,
         medicationRepository = medicationRepositoryMock,
-        storageService = storageServiceMock,
+        storageService = csvStorageService,
         processControlRepository = processControlRepositoryMock
     )
 
+    private val importAnvisaLeafletsUseCase = ImportAnvisaLeafletsUseCase(
+        repository = medicationRepositoryMock,
+        anvisaService = integrationServiceMock,
+        storageService = leafletStorageService,
+        processControlRepository = processControlRepositoryMock
+    )
     @Test
     fun postImport_withoutOidcAuthentication_returns401() = testApplication {
         application { setupTestEnvironment(simulateAuthSuccess = false) }
@@ -96,8 +105,14 @@ class AnvisaRoutingTest {
     private fun Application.setupTestEnvironment(simulateAuthSuccess: Boolean) {
         install(Koin) {
             modules(module {
-                single { importUseCase }
-                single { AnvisaController(importAnvisaInformationUseCase = get()) }
+                single { importAnvisaInformationUseCase }
+                single { importAnvisaLeafletsUseCase }
+                single {
+                    AnvisaController(
+                        importAnvisaInformationUseCase = get(),
+                        importAnvisaLeafletsUseCase = get()
+                    )
+                }
             })
         }
         configureSerialization()
