@@ -35,7 +35,7 @@ class DownloadImageUseCase(
         val history = repository.findHistoryById(executionId)
             ?: throw ResourceNotFoundException("Histórico não encontrado para o executionId: $executionId")
 
-        val storageImagePath = history.storageImagePath ?: return Pair(null, null)
+        val storageImagePath = history.storagePath ?: return Pair(null, null)
 
         val fileName = storageImagePath.substringAfter("gs://").substringAfter("/")
         val extension = fileName.substringAfterLast('.', "")

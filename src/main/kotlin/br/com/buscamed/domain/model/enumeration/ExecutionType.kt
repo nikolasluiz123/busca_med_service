@@ -5,5 +5,6 @@ package br.com.buscamed.domain.model.enumeration
  */
 enum class ExecutionType {
     IMAGE,
-    TEXT
+    TEXT,
+    PDF
 }

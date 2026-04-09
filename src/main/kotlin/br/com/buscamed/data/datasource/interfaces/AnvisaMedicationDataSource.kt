@@ -2,7 +2,6 @@ package br.com.buscamed.data.datasource.interfaces
 
 import br.com.buscamed.data.document.AnvisaMedicationDocument
 import br.com.buscamed.data.document.AnvisaMedicationLeafletDocument
-import br.com.buscamed.domain.model.anvisa.AnvisaMedicationLeaflet
 
 /**
  * Fonte de dados para operações de medicamentos da ANVISA.
@@ -25,4 +24,16 @@ interface AnvisaMedicationDataSource {
      * Atualiza apenas o status da bula de um medicamento específico.
      */
     suspend fun updateLeafletStatus(id: String, hasLeaflet: Boolean, leaflets: List<AnvisaMedicationLeafletDocument>)
+
+    suspend fun saveLeaflets(
+        medicationIds: List<String>,
+        leaflets: List<AnvisaMedicationLeafletDocument>,
+        leafletIdentifier: String?
+    )
+
+    suspend fun findMedicationsWithoutProfessionalLeafletsResume(limit: Int): List<AnvisaMedicationDocument>
+
+    suspend fun findMedicationsWithoutPatientLeafletsResume(limit: Int): List<AnvisaMedicationDocument>
+
+    suspend fun findLeafletBy(medicationId: String, leafletIdentifier: String): AnvisaMedicationLeafletDocument?
 }

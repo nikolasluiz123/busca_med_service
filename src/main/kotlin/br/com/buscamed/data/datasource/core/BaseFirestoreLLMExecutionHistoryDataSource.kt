@@ -30,7 +30,7 @@ abstract class BaseFirestoreLLMExecutionHistoryDataSource(
             .document(collectionName)
             .collection(RECORDS_COLLECTION)
             .document(historyId)
-            .update(LLMExecutionHistoryDocument::storageImagePath.name, path)
+            .update(LLMExecutionHistoryDocument::storagePath.name, path)
             .get()
     }
 

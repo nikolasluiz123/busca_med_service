@@ -1,6 +1,7 @@
 package br.com.buscamed.core.config
 
 import br.com.buscamed.api.v1.anvisa.AnvisaController
+import br.com.buscamed.api.v1.leaflet.LeafletController
 import br.com.buscamed.api.v1.pillpack.PillPackController
 import br.com.buscamed.api.v1.prescription.PrescriptionController
 import br.com.buscamed.core.config.properties.GeminiConfig
@@ -8,6 +9,8 @@ import br.com.buscamed.data.client.anvisa.AnvisaIntegrationKtorClient
 import br.com.buscamed.data.client.core.HttpClientFactory
 import br.com.buscamed.data.client.gemini.image.GeminiMedicalPrescriptionImageProcessClient
 import br.com.buscamed.data.client.gemini.image.GeminiPillPackImageProcessClient
+import br.com.buscamed.data.client.gemini.pdf.GeminiPatientLeafletPDFProcessClient
+import br.com.buscamed.data.client.gemini.pdf.GeminiProfessionalLeafletPDFProcessClient
 import br.com.buscamed.data.client.gemini.text.GeminiMedicalPrescriptionTextProcessClient
 import br.com.buscamed.data.client.gemini.text.GeminiPillPackTextProcessClient
 import br.com.buscamed.data.client.storage.google.csv.AnvisaCsvGoogleStorageClient
@@ -16,7 +19,9 @@ import br.com.buscamed.data.client.storage.google.image.PillPackGoogleStorageCli
 import br.com.buscamed.data.client.storage.google.pdf.AnvisaLeafletPDFGoogleStorageClient
 import br.com.buscamed.data.datasource.FirestoreAnvisaMedicationDataSource
 import br.com.buscamed.data.datasource.FirestoreMedicalPrescriptionExecutionHistoryDataSource
+import br.com.buscamed.data.datasource.FirestorePatientLeafletExecutionHistoryDataSource
 import br.com.buscamed.data.datasource.FirestorePillPackExecutionHistoryDataSource
+import br.com.buscamed.data.datasource.FirestoreProfessionalLeafletExecutionHistoryDataSource
 import br.com.buscamed.data.datasource.FirestoreSystemProcessControlDataSource
 import br.com.buscamed.data.datasource.interfaces.AnvisaMedicationDataSource
 import br.com.buscamed.data.datasource.interfaces.LLMExecutionHistoryDataSource
@@ -24,7 +29,9 @@ import br.com.buscamed.data.datasource.interfaces.SystemProcessControlDataSource
 import br.com.buscamed.data.parser.ApacheCommonsAnvisaCsvParser
 import br.com.buscamed.data.repository.AnvisaMedicationRepositoryImpl
 import br.com.buscamed.data.repository.MedicalPrescriptionExecutionHistoryRepositoryImpl
+import br.com.buscamed.data.repository.PatientLeafletExecutionHistoryRepositoryImpl
 import br.com.buscamed.data.repository.PillPackExecutionHistoryRepositoryImpl
+import br.com.buscamed.data.repository.ProfessionalLeafletExecutionHistoryRepositoryImpl
 import br.com.buscamed.data.repository.SystemProcessControlRepositoryImpl
 import br.com.buscamed.domain.parser.AnvisaCsvParser
 import br.com.buscamed.domain.repository.AnvisaMedicationRepository
@@ -32,6 +39,7 @@ import br.com.buscamed.domain.repository.LLMExecutionHistoryRepository
 import br.com.buscamed.domain.repository.SystemProcessControlRepository
 import br.com.buscamed.domain.service.AnvisaIntegrationService
 import br.com.buscamed.domain.service.CsvStorageService
+import br.com.buscamed.domain.service.LLMPDFProcessService
 import br.com.buscamed.domain.service.LeafletStorageService
 import br.com.buscamed.domain.usecase.*
 import com.google.cloud.firestore.Firestore
@@ -52,9 +60,13 @@ import org.koin.logger.slf4jLogger
 object DiQualifiers {
     const val DS_MEDICAL_PRESCRIPTION = "DataSourceMedicalPrescription"
     const val DS_PILL_PACK = "DataSourcePillPack"
+    const val DS_PATIENT_LEAFLET = "DataSourcePatientLeaflet"
+    const val DS_PROFESSIONAL_LEAFLET = "DataSourceProfessionalLeaflet"
 
     const val REPO_MEDICAL_PRESCRIPTION = "RepositoryMedicalPrescription"
     const val REPO_PILL_PACK = "RepositoryPillPack"
+    const val REPO_PATIENT_LEAFLET = "RepositoryPatientLeaflet"
+    const val REPO_PROFESSIONAL_LEAFLET = "RepositoryProfessionalLeaflet"
 
     const val UC_DOWNLOAD_MEDICAL_PRESCRIPTION_IMAGE = "DownloadMedicalPrescriptionImageUseCase"
     const val UC_DOWNLOAD_PILL_PACK_IMAGE = "DownloadPillPackImageUseCase"
@@ -67,6 +79,9 @@ object DiQualifiers {
      const val UC_PROCESS_TEXT_PILL_PACK = "ProcessTextPillPackUseCase"
      const val UC_GET_HISTORY_PRESCRIPTION = "GetHistoryPrescriptionUseCase"
      const val UC_GET_HISTORY_PILL_PACK = "GetHistoryPillPackUseCase"
+
+     const val PDF_PATIENT_LEAFLET = "GeminiPatientLeafletPDFProcessClient"
+     const val PDF_PROFESSIONAL_LEAFLET = "GeminiProfessionalLeafletPDFProcessClient"
 }
 
 /**
@@ -139,6 +154,14 @@ fun appModule(environment: ApplicationEnvironment) = module {
     factory<LLMExecutionHistoryDataSource>(named(DiQualifiers.DS_PILL_PACK)) {
         FirestorePillPackExecutionHistoryDataSource(db = get())
     }
+    
+    factory<LLMExecutionHistoryDataSource>(named(DiQualifiers.DS_PATIENT_LEAFLET)) {
+        FirestorePatientLeafletExecutionHistoryDataSource(db = get())
+    }
+    
+    factory<LLMExecutionHistoryDataSource>(named(DiQualifiers.DS_PROFESSIONAL_LEAFLET)) {
+        FirestoreProfessionalLeafletExecutionHistoryDataSource(db = get())
+    }
 
     factory<AnvisaMedicationDataSource> {
         FirestoreAnvisaMedicationDataSource(db = get())
@@ -159,6 +182,18 @@ fun appModule(environment: ApplicationEnvironment) = module {
             dataSource = get(named(DiQualifiers.DS_PILL_PACK))
         )
     }
+    
+    factory<LLMExecutionHistoryRepository>(named(DiQualifiers.REPO_PATIENT_LEAFLET)) {
+        PatientLeafletExecutionHistoryRepositoryImpl(
+            dataSource = get(named(DiQualifiers.DS_PATIENT_LEAFLET))
+        )
+    }
+    
+    factory<LLMExecutionHistoryRepository>(named(DiQualifiers.REPO_PROFESSIONAL_LEAFLET)) {
+        ProfessionalLeafletExecutionHistoryRepositoryImpl(
+            dataSource = get(named(DiQualifiers.DS_PROFESSIONAL_LEAFLET))
+        )
+    }
 
     factory<AnvisaMedicationRepository> {
         AnvisaMedicationRepositoryImpl(dataSource = get())
@@ -171,13 +206,15 @@ fun appModule(environment: ApplicationEnvironment) = module {
     single { MedicalPrescriptionGoogleStorageClient(storage = get()) }
     single { PillPackGoogleStorageClient(storage = get()) }
     single<CsvStorageService> { AnvisaCsvGoogleStorageClient(storage = get()) }
-    single<CsvStorageService> { AnvisaCsvGoogleStorageClient(storage = get()) }
     single<LeafletStorageService> { AnvisaLeafletPDFGoogleStorageClient(storage = get()) }
 
     single { GeminiMedicalPrescriptionImageProcessClient(config = get()) }
     single { GeminiPillPackImageProcessClient(config = get()) }
     single { GeminiMedicalPrescriptionTextProcessClient(config = get()) }
     single { GeminiPillPackTextProcessClient(config = get()) }
+
+    single<LLMPDFProcessService>(named(DiQualifiers.PDF_PATIENT_LEAFLET)) { GeminiPatientLeafletPDFProcessClient(config = get()) }
+    single<LLMPDFProcessService>(named(DiQualifiers.PDF_PROFESSIONAL_LEAFLET)) { GeminiProfessionalLeafletPDFProcessClient(config = get()) }
 
     single<AnvisaIntegrationService> {
         AnvisaIntegrationKtorClient(httpClient = get(named(DiQualifiers.HTTP_CLIENT_ANVISA)))
@@ -248,6 +285,32 @@ fun appModule(environment: ApplicationEnvironment) = module {
     }
 
     factory {
+        ResumePatientLeafletUseCase(
+            repository = get(),
+            storageService = get(),
+            pdfProcessService = get(named(DiQualifiers.PDF_PATIENT_LEAFLET)),
+            executionHistoryRepository = get(named(DiQualifiers.REPO_PATIENT_LEAFLET))
+        )
+    }
+
+    factory {
+        ResumeProfessionalLeafletUseCase(
+            repository = get(),
+            storageService = get(),
+            pdfProcessService = get(named(DiQualifiers.PDF_PROFESSIONAL_LEAFLET)),
+            executionHistoryRepository = get(named(DiQualifiers.REPO_PROFESSIONAL_LEAFLET))
+        )
+    }
+
+    factory {
+        ResumeLeafletUseCase(
+            repository = get(),
+            resumePatientLeafletUseCase = get(),
+            resumeProfessionalLeafletUseCase = get()
+        )
+    }
+
+    factory {
         PrescriptionController(
             processImageUseCase = get(named(DiQualifiers.UC_PROCESS_IMAGE_PRESCRIPTION)),
             processTextUseCase = get(named(DiQualifiers.UC_PROCESS_TEXT_PRESCRIPTION)),
@@ -288,6 +351,14 @@ fun appModule(environment: ApplicationEnvironment) = module {
         AnvisaController(
             importAnvisaInformationUseCase = get(),
             importAnvisaLeafletsUseCase = get()
+        )
+    }
+
+    factory {
+        LeafletController(
+            resumeLeafletUseCase = get(),
+            resumePatientLeafletUseCase = get(),
+            resumeProfessionalLeafletUseCase = get()
         )
     }
 }

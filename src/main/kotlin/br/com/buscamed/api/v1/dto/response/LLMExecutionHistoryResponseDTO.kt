@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  * @property success Indica se a execução foi finalizada com sucesso.
  * @property startDate Data e hora de início da execução (formato ISO-8601).
  * @property endDate Data e hora de término da execução (formato ISO-8601).
- * @property storageImagePath Caminho do arquivo de imagem salvo no storage.
+ * @property storagePath Caminho do arquivo salvo no storage.
  * @property prompt Nome do arquivo ou versão do prompt utilizado.
  * @property clientProcessorVersion Versão do pipeline de processamento do client.
  * @property llmModel O modelo de LLM que foi utilizado (ex: gemini-2.5-flash-lite).
@@ -30,7 +30,7 @@ data class LLMExecutionHistoryResponseDTO(
     val success: Boolean,
     val startDate: String,
     val endDate: String,
-    val storageImagePath: String?,
+    val storagePath: String?,
     val prompt: String,
     val clientProcessorVersion: String = "",
     val llmModel: String

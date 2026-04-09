@@ -22,5 +22,7 @@ data class AnvisaMedicationDocument(
     val productType: String = "",
     val hospitalRestriction: Boolean = false,
     val stripe: String = "",
-    val hasLeaflet: Boolean = false
+    val hasLeaflet: Boolean = false,
+    val hasLeafletPatientResume: Boolean = false,
+    val hasLeafletProfessionalResume: Boolean = false
 ) : FirestoreDocument

@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: BuscaMed API
   description: |
-    API do sistema BuscaMed para processamento de prescrições médicas e cartelas de comprimidos utilizando LLM (Google Gemini), além da sincronização de dados de medicamentos da ANVISA.
+    API do sistema BuscaMed para processamento de prescrições médicas e cartelas de comprimidos utilizando LLM (Google Gemini), além da sincronização de dados de medicamentos da ANVISA e resumo de bulas.
   version: 0.1.0
 
 servers:
@@ -353,7 +353,7 @@ paths:
         - Anvisa
       responses:
         '202':
-          description: Processamento assíncrono aceito e iniciado
+          description: Processamento assíncreno aceito e iniciado
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '502':
@@ -362,6 +362,80 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponseDTO'
+
+  /v1/leaflet/resume:
+    post:
+      summary: Dispara o resumo assíncrono das bulas (pacientes e profissionais)
+      description: O Cloud Scheduler chama este endpoint para resumir bulas em PDF pendentes no Firestore usando LLM, gravando os resumos em lote. Requer autenticação OIDC.
+      tags:
+        - Leaflet
+      responses:
+        '202':
+          description: Processamento de bulas aceito e iniciado
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /v1/leaflet/resume/patient:
+    post:
+      summary: Retorna o resumo estruturado de uma bula de paciente
+      description: Gera sob demanda o resumo para o medicamento fornecido ou retorna do banco caso já processado. Requer autenticação Firebase.
+      tags:
+        - Leaflet
+      parameters:
+        - in: query
+          name: medicationId
+          schema:
+            type: string
+          required: true
+          description: O código GGREM do medicamento
+      responses:
+        '200':
+          description: Resumo gerado ou recuperado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientLeafletResponseDTO'
+        '204':
+          description: 'Resumo indisponível (medicamento não encontrado ou sem bula PDF na base)'
+        '400':
+          description: 'Falha na requisição (ex: medicationId não fornecido)'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /v1/leaflet/resume/professional:
+    post:
+      summary: Retorna o resumo estruturado de uma bula de profissional de saúde
+      description: Gera sob demanda o resumo para o medicamento fornecido ou retorna do banco caso já processado. Requer autenticação Firebase.
+      tags:
+        - Leaflet
+      parameters:
+        - in: query
+          name: medicationId
+          schema:
+            type: string
+          required: true
+          description: O código GGREM do medicamento
+      responses:
+        '200':
+          description: Resumo gerado ou recuperado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfessionalLeafletResponseDTO'
+        '204':
+          description: Resumo indisponível (medicamento não encontrado ou sem bula PDF na base)
+        '400':
+          description: 'Falha na requisição (ex: medicationId não fornecido)'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
 
 components:
   securitySchemes:
@@ -584,3 +658,69 @@ components:
           type: string
           nullable: true
           example: "L123456"
+          
+    PatientLeafletResponseDTO:
+      type: object
+      description: Estrutura de dados contendo o resumo extraído de uma bula destinada ao paciente.
+      properties:
+        indications:
+          type: array
+          items:
+            type: string
+        mechanism_of_action:
+          type: string
+          nullable: true
+        contraindications:
+          type: array
+          items:
+            type: string
+        precautions_and_warnings:
+          type: array
+          items:
+            type: string
+        interactions_to_avoid:
+          type: array
+          items:
+            type: string
+        how_to_use:
+          type: string
+          nullable: true
+        missed_dose:
+          type: string
+          nullable: true
+        common_side_effects:
+          type: array
+          items:
+            type: string
+            
+    ProfessionalLeafletResponseDTO:
+      type: object
+      description: Estrutura de dados contendo o resumo extraído de uma bula destinada aos profissionais da saúde.
+      properties:
+        indications_and_spectrum:
+          type: array
+          items:
+            type: string
+        pharmacological_properties:
+          type: string
+          nullable: true
+        clinical_warnings:
+          type: array
+          items:
+            type: string
+        dosage_adjustments:
+          type: array
+          items:
+            type: string
+        drug_interactions:
+          type: array
+          items:
+            type: string
+        adverse_reactions:
+          type: array
+          items:
+            type: string
+        lab_test_interferences:
+          type: array
+          items:
+            type: string

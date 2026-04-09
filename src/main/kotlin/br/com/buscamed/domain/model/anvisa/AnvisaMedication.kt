@@ -21,6 +21,8 @@ import br.com.buscamed.domain.model.anvisa.enumeration.MedicationStripe
  * @property isHospitalRestriction Indica se a venda é restrita a hospitais.
  * @property stripe Classificação da necessidade de prescrição (tarja).
  * @property hasLeaflet Indica se esse medicamento já teve a sua bula baixada.
+ * @property hasLeafletPatientResume Indica se esse medicamento tem resumo da bula para pacientes.
+ * @property hasLeafletProfessionalResume Indica se esse medicamento tem resumo da bula para profissionais.
  */
 data class AnvisaMedication(
     val ggremCode: String,
@@ -37,5 +39,7 @@ data class AnvisaMedication(
     val productType: AnvisaProductType,
     val isHospitalRestriction: Boolean,
     val stripe: MedicationStripe,
-    val hasLeaflet: Boolean = false
+    val hasLeaflet: Boolean = false,
+    val hasLeafletPatientResume: Boolean = false,
+    val hasLeafletProfessionalResume: Boolean = false
 )

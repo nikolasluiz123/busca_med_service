@@ -825,6 +825,54 @@
     }
   }
 };
+            defs["PatientLeafletResponseDTO"] = {
+  "type" : "object",
+  "properties" : {
+    "indications" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "mechanism_of_action" : {
+      "type" : "string",
+      "nullable" : true
+    },
+    "contraindications" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "precautions_and_warnings" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "interactions_to_avoid" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "how_to_use" : {
+      "type" : "string",
+      "nullable" : true
+    },
+    "missed_dose" : {
+      "type" : "string",
+      "nullable" : true
+    },
+    "common_side_effects" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    }
+  },
+  "description" : "Estrutura de dados contendo o resumo extraído de uma bula destinada ao paciente."
+};
             defs["PillPackComponentDTO"] = {
   "type" : "object",
   "properties" : {
@@ -937,6 +985,52 @@
   },
   "description" : "Estrutura retornada pelo Gemini baseada no prompt de prescrição médica."
 };
+            defs["ProfessionalLeafletResponseDTO"] = {
+  "type" : "object",
+  "properties" : {
+    "indications_and_spectrum" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "pharmacological_properties" : {
+      "type" : "string",
+      "nullable" : true
+    },
+    "clinical_warnings" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "dosage_adjustments" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "drug_interactions" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "adverse_reactions" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "lab_test_interferences" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    }
+  },
+  "description" : "Estrutura de dados contendo o resumo extraído de uma bula destinada aos profissionais da saúde."
+};
             defs["ValueUnitDTO"] = {
   "type" : "object",
   "properties" : {
@@ -974,6 +1068,16 @@
                     </li>
                     <li data-group="Anvisa" data-name="v1AnvisaImportMedicationsPost" class="">
                       <a href="#api-Anvisa-v1AnvisaImportMedicationsPost">v1AnvisaImportMedicationsPost</a>
+                    </li>
+                  <li class="nav-header" data-group="Leaflet"><a href="#api-Leaflet">API Methods - Leaflet</a></li>
+                    <li data-group="Leaflet" data-name="v1LeafletResumePatientPost" class="">
+                      <a href="#api-Leaflet-v1LeafletResumePatientPost">v1LeafletResumePatientPost</a>
+                    </li>
+                    <li data-group="Leaflet" data-name="v1LeafletResumePost" class="">
+                      <a href="#api-Leaflet-v1LeafletResumePost">v1LeafletResumePost</a>
+                    </li>
+                    <li data-group="Leaflet" data-name="v1LeafletResumeProfessionalPost" class="">
+                      <a href="#api-Leaflet-v1LeafletResumeProfessionalPost">v1LeafletResumeProfessionalPost</a>
                     </li>
                   <li class="nav-header" data-group="PillPack"><a href="#api-PillPack">API Methods - PillPack</a></li>
                     <li data-group="PillPack" data-name="v1PillpackHistoryGet" class="">
@@ -1016,7 +1120,7 @@
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
               <div class="app-desc">Version: 0.1.0</div>
             <hr>
-            <div>API do sistema BuscaMed para processamento de prescrições médicas e cartelas de comprimidos utilizando LLM (Google Gemini), além da sincronização de dados de medicamentos da ANVISA.</div>
+            <div>API do sistema BuscaMed para processamento de prescrições médicas e cartelas de comprimidos utilizando LLM (Google Gemini), além da sincronização de dados de medicamentos da ANVISA e resumo de bulas.</div>
           </div>
         </div>
         <div id="sections">
@@ -1230,7 +1334,7 @@ except ApiException as e:
 
 
                           <h2>Responses</h2>
-                            <h3> Status: 202 - Processamento assíncrono aceito e iniciado </h3>
+                            <h3> Status: 202 - Processamento assíncreno aceito e iniciado </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                             </ul>
@@ -1567,6 +1671,975 @@ except ApiException as e:
                                   </div>
                                   <input id='responses-v1AnvisaImportMedicationsPost-502-schema-data' type='hidden' value=''></input>
                                 </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                  </section>
+                <section id="api-Leaflet">
+                  <h1>Leaflet</h1>
+                    <div id="api-Leaflet-v1LeafletResumePatientPost">
+                      <article id="api-Leaflet-v1LeafletResumePatientPost-0" data-group="User" data-name="v1LeafletResumePatientPost" data-version="0">
+                        <div class="pull-left">
+                          <h1>v1LeafletResumePatientPost</h1>
+                          <p>Retorna o resumo estruturado de uma bula de paciente</p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Gera sob demanda o resumo para o medicamento fornecido ou retorna do banco caso já processado. Requer autenticação Firebase.</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/v1/leaflet/resume/patient</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Leaflet-v1LeafletResumePatientPost-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePatientPost-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePatientPost-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Leaflet-v1LeafletResumePatientPost-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePatientPost-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePatientPost-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Leaflet-v1LeafletResumePatientPost-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePatientPost-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePatientPost-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePatientPost-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePatientPost-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Leaflet-v1LeafletResumePatientPost-0-curl">
+                           <pre class="prettyprint"><code class="language-bsh">curl -X POST\
+ -H "Authorization: Bearer [[accessToken]]"\
+-H "Accept: application/json"\
+"https://buscamed-service-7zd5rrmmaq-rj.a.run.app/v1/leaflet/resume/patient?medicationId="</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePatientPost-0-java">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.*;
+import io.swagger.client.auth.*;
+import io.swagger.client.model.*;
+import io.swagger.client.api.LeafletApi;
+
+import java.io.File;
+import java.util.*;
+
+public class LeafletApiExample {
+
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+
+
+        LeafletApi apiInstance = new LeafletApi();
+        String medicationId = medicationId_example; // String | O código GGREM do medicamento
+        try {
+            PatientLeafletResponseDTO result = apiInstance.v1LeafletResumePatientPost(medicationId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LeafletApi#v1LeafletResumePatientPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePatientPost-0-android">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.api.LeafletApi;
+
+public class LeafletApiExample {
+
+    public static void main(String[] args) {
+        LeafletApi apiInstance = new LeafletApi();
+        String medicationId = medicationId_example; // String | O código GGREM do medicamento
+        try {
+            PatientLeafletResponseDTO result = apiInstance.v1LeafletResumePatientPost(medicationId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LeafletApi#v1LeafletResumePatientPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePatientPost-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePatientPost-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
+String *medicationId = medicationId_example; // O código GGREM do medicamento
+
+LeafletApi *apiInstance = [[LeafletApi alloc] init];
+
+// Retorna o resumo estruturado de uma bula de paciente
+[apiInstance v1LeafletResumePatientPostWith:medicationId
+              completionHandler: ^(PatientLeafletResponseDTO output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePatientPost-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var BuscaMedApi = require('busca_med_api');
+var defaultClient = BuscaMedApi.ApiClient.instance;
+
+
+var api = new BuscaMedApi.LeafletApi()
+var medicationId = medicationId_example; // {{String}} O código GGREM do medicamento
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.v1LeafletResumePatientPost(medicationId, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Leaflet-v1LeafletResumePatientPost-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePatientPost-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using IO.Swagger.Api;
+using IO.Swagger.Client;
+using IO.Swagger.Model;
+
+namespace Example
+{
+    public class v1LeafletResumePatientPostExample
+    {
+        public void main()
+        {
+
+
+            var apiInstance = new LeafletApi();
+            var medicationId = medicationId_example;  // String | O código GGREM do medicamento
+
+            try
+            {
+                // Retorna o resumo estruturado de uma bula de paciente
+                PatientLeafletResponseDTO result = apiInstance.v1LeafletResumePatientPost(medicationId);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling LeafletApi.v1LeafletResumePatientPost: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePatientPost-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+
+$api_instance = new Swagger\Client\ApiLeafletApi();
+$medicationId = medicationId_example; // String | O código GGREM do medicamento
+
+try {
+    $result = $api_instance->v1LeafletResumePatientPost($medicationId);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling LeafletApi->v1LeafletResumePatientPost: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePatientPost-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::SwaggerClient::Configuration;
+use WWW::SwaggerClient::LeafletApi;
+
+
+my $api_instance = WWW::SwaggerClient::LeafletApi->new();
+my $medicationId = medicationId_example; # String | O código GGREM do medicamento
+
+eval { 
+    my $result = $api_instance->v1LeafletResumePatientPost(medicationId => $medicationId);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling LeafletApi->v1LeafletResumePatientPost: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePatientPost-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_client
+from swagger_client.rest import ApiException
+from pprint import pprint
+
+
+# create an instance of the API class
+api_instance = swagger_client.LeafletApi()
+medicationId = medicationId_example # String | O código GGREM do medicamento
+
+try: 
+    # Retorna o resumo estruturado de uma bula de paciente
+    api_response = api_instance.v1_leaflet_resume_patient_post(medicationId)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling LeafletApi->v1LeafletResumePatientPost: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">medicationId*</td>
+                                <td>
+                                
+                                
+                                    <div id="d2e199_v1LeafletResumePatientPost_medicationId">
+                                        <div class="json-schema-view">
+                                            <div class="primitive">
+                                                <span class="type">
+                                                    String
+                                                </span>
+                                
+                                                    <div class="inner description">
+                                                        O código GGREM do medicamento
+                                                    </div>
+                                            </div>
+                                                <div class="inner required">
+                                                    Required
+                                                </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                </tr>
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - Resumo gerado ou recuperado com sucesso </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-v1LeafletResumePatientPost-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-v1LeafletResumePatientPost-200-schema">
+                                  <div id='responses-v1LeafletResumePatientPost-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Resumo gerado ou recuperado com sucesso",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/PatientLeafletResponseDTO"
+      }
+    }
+  }
+};
+                                        var schema = schemaWrapper.content["application/json"].schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.components = {};
+                                          schemaWrapper.components.schemas = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-v1LeafletResumePatientPost-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-v1LeafletResumePatientPost-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-v1LeafletResumePatientPost-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 204 - Resumo indisponível (medicamento não encontrado ou sem bula PDF na base) </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                            <h3> Status: 400 - Falha na requisição (ex: medicationId não fornecido) </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-v1LeafletResumePatientPost-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-v1LeafletResumePatientPost-400-schema">
+                                  <div id='responses-v1LeafletResumePatientPost-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Falha na requisição (ex: medicationId não fornecido)",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/ErrorResponseDTO"
+      }
+    }
+  }
+};
+                                        var schema = schemaWrapper.content["application/json"].schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.components = {};
+                                          schemaWrapper.components.schemas = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-v1LeafletResumePatientPost-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-v1LeafletResumePatientPost-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-v1LeafletResumePatientPost-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 401 -  </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Leaflet-v1LeafletResumePost">
+                      <article id="api-Leaflet-v1LeafletResumePost-0" data-group="User" data-name="v1LeafletResumePost" data-version="0">
+                        <div class="pull-left">
+                          <h1>v1LeafletResumePost</h1>
+                          <p>Dispara o resumo assíncrono das bulas (pacientes e profissionais)</p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">O Cloud Scheduler chama este endpoint para resumir bulas em PDF pendentes no Firestore usando LLM, gravando os resumos em lote. Requer autenticação OIDC.</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/v1/leaflet/resume</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Leaflet-v1LeafletResumePost-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePost-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePost-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Leaflet-v1LeafletResumePost-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePost-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePost-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Leaflet-v1LeafletResumePost-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePost-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePost-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePost-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumePost-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Leaflet-v1LeafletResumePost-0-curl">
+                           <pre class="prettyprint"><code class="language-bsh">curl -X POST\
+ -H "Authorization: Bearer [[accessToken]]"\
+"https://buscamed-service-7zd5rrmmaq-rj.a.run.app/v1/leaflet/resume"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePost-0-java">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.*;
+import io.swagger.client.auth.*;
+import io.swagger.client.model.*;
+import io.swagger.client.api.LeafletApi;
+
+import java.io.File;
+import java.util.*;
+
+public class LeafletApiExample {
+
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+
+
+        LeafletApi apiInstance = new LeafletApi();
+        try {
+            apiInstance.v1LeafletResumePost();
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LeafletApi#v1LeafletResumePost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePost-0-android">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.api.LeafletApi;
+
+public class LeafletApiExample {
+
+    public static void main(String[] args) {
+        LeafletApi apiInstance = new LeafletApi();
+        try {
+            apiInstance.v1LeafletResumePost();
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LeafletApi#v1LeafletResumePost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePost-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePost-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
+
+LeafletApi *apiInstance = [[LeafletApi alloc] init];
+
+// Dispara o resumo assíncrono das bulas (pacientes e profissionais)
+[apiInstance v1LeafletResumePostWithCompletionHandler: 
+              ^(NSError* error) {
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePost-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var BuscaMedApi = require('busca_med_api');
+var defaultClient = BuscaMedApi.ApiClient.instance;
+
+
+var api = new BuscaMedApi.LeafletApi()
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully.');
+  }
+};
+api.v1LeafletResumePost(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Leaflet-v1LeafletResumePost-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePost-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using IO.Swagger.Api;
+using IO.Swagger.Client;
+using IO.Swagger.Model;
+
+namespace Example
+{
+    public class v1LeafletResumePostExample
+    {
+        public void main()
+        {
+
+
+            var apiInstance = new LeafletApi();
+
+            try
+            {
+                // Dispara o resumo assíncrono das bulas (pacientes e profissionais)
+                apiInstance.v1LeafletResumePost();
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling LeafletApi.v1LeafletResumePost: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePost-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+
+$api_instance = new Swagger\Client\ApiLeafletApi();
+
+try {
+    $api_instance->v1LeafletResumePost();
+} catch (Exception $e) {
+    echo 'Exception when calling LeafletApi->v1LeafletResumePost: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePost-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::SwaggerClient::Configuration;
+use WWW::SwaggerClient::LeafletApi;
+
+
+my $api_instance = WWW::SwaggerClient::LeafletApi->new();
+
+eval { 
+    $api_instance->v1LeafletResumePost();
+};
+if ($@) {
+    warn "Exception when calling LeafletApi->v1LeafletResumePost: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumePost-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_client
+from swagger_client.rest import ApiException
+from pprint import pprint
+
+
+# create an instance of the API class
+api_instance = swagger_client.LeafletApi()
+
+try: 
+    # Dispara o resumo assíncrono das bulas (pacientes e profissionais)
+    api_instance.v1_leaflet_resume_post()
+except ApiException as e:
+    print("Exception when calling LeafletApi->v1LeafletResumePost: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 - Processamento de bulas aceito e iniciado </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                            <h3> Status: 401 -  </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Leaflet-v1LeafletResumeProfessionalPost">
+                      <article id="api-Leaflet-v1LeafletResumeProfessionalPost-0" data-group="User" data-name="v1LeafletResumeProfessionalPost" data-version="0">
+                        <div class="pull-left">
+                          <h1>v1LeafletResumeProfessionalPost</h1>
+                          <p>Retorna o resumo estruturado de uma bula de profissional de saúde</p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Gera sob demanda o resumo para o medicamento fornecido ou retorna do banco caso já processado. Requer autenticação Firebase.</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/v1/leaflet/resume/professional</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Leaflet-v1LeafletResumeProfessionalPost-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumeProfessionalPost-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumeProfessionalPost-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Leaflet-v1LeafletResumeProfessionalPost-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumeProfessionalPost-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumeProfessionalPost-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Leaflet-v1LeafletResumeProfessionalPost-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumeProfessionalPost-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumeProfessionalPost-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumeProfessionalPost-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Leaflet-v1LeafletResumeProfessionalPost-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Leaflet-v1LeafletResumeProfessionalPost-0-curl">
+                           <pre class="prettyprint"><code class="language-bsh">curl -X POST\
+ -H "Authorization: Bearer [[accessToken]]"\
+-H "Accept: application/json"\
+"https://buscamed-service-7zd5rrmmaq-rj.a.run.app/v1/leaflet/resume/professional?medicationId="</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Leaflet-v1LeafletResumeProfessionalPost-0-java">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.*;
+import io.swagger.client.auth.*;
+import io.swagger.client.model.*;
+import io.swagger.client.api.LeafletApi;
+
+import java.io.File;
+import java.util.*;
+
+public class LeafletApiExample {
+
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+
+
+        LeafletApi apiInstance = new LeafletApi();
+        String medicationId = medicationId_example; // String | O código GGREM do medicamento
+        try {
+            ProfessionalLeafletResponseDTO result = apiInstance.v1LeafletResumeProfessionalPost(medicationId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LeafletApi#v1LeafletResumeProfessionalPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Leaflet-v1LeafletResumeProfessionalPost-0-android">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.api.LeafletApi;
+
+public class LeafletApiExample {
+
+    public static void main(String[] args) {
+        LeafletApi apiInstance = new LeafletApi();
+        String medicationId = medicationId_example; // String | O código GGREM do medicamento
+        try {
+            ProfessionalLeafletResponseDTO result = apiInstance.v1LeafletResumeProfessionalPost(medicationId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling LeafletApi#v1LeafletResumeProfessionalPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Leaflet-v1LeafletResumeProfessionalPost-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumeProfessionalPost-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
+String *medicationId = medicationId_example; // O código GGREM do medicamento
+
+LeafletApi *apiInstance = [[LeafletApi alloc] init];
+
+// Retorna o resumo estruturado de uma bula de profissional de saúde
+[apiInstance v1LeafletResumeProfessionalPostWith:medicationId
+              completionHandler: ^(ProfessionalLeafletResponseDTO output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumeProfessionalPost-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var BuscaMedApi = require('busca_med_api');
+var defaultClient = BuscaMedApi.ApiClient.instance;
+
+
+var api = new BuscaMedApi.LeafletApi()
+var medicationId = medicationId_example; // {{String}} O código GGREM do medicamento
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.v1LeafletResumeProfessionalPost(medicationId, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Leaflet-v1LeafletResumeProfessionalPost-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumeProfessionalPost-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using IO.Swagger.Api;
+using IO.Swagger.Client;
+using IO.Swagger.Model;
+
+namespace Example
+{
+    public class v1LeafletResumeProfessionalPostExample
+    {
+        public void main()
+        {
+
+
+            var apiInstance = new LeafletApi();
+            var medicationId = medicationId_example;  // String | O código GGREM do medicamento
+
+            try
+            {
+                // Retorna o resumo estruturado de uma bula de profissional de saúde
+                ProfessionalLeafletResponseDTO result = apiInstance.v1LeafletResumeProfessionalPost(medicationId);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling LeafletApi.v1LeafletResumeProfessionalPost: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumeProfessionalPost-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+
+$api_instance = new Swagger\Client\ApiLeafletApi();
+$medicationId = medicationId_example; // String | O código GGREM do medicamento
+
+try {
+    $result = $api_instance->v1LeafletResumeProfessionalPost($medicationId);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling LeafletApi->v1LeafletResumeProfessionalPost: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumeProfessionalPost-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::SwaggerClient::Configuration;
+use WWW::SwaggerClient::LeafletApi;
+
+
+my $api_instance = WWW::SwaggerClient::LeafletApi->new();
+my $medicationId = medicationId_example; # String | O código GGREM do medicamento
+
+eval { 
+    my $result = $api_instance->v1LeafletResumeProfessionalPost(medicationId => $medicationId);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling LeafletApi->v1LeafletResumeProfessionalPost: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Leaflet-v1LeafletResumeProfessionalPost-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_client
+from swagger_client.rest import ApiException
+from pprint import pprint
+
+
+# create an instance of the API class
+api_instance = swagger_client.LeafletApi()
+medicationId = medicationId_example # String | O código GGREM do medicamento
+
+try: 
+    # Retorna o resumo estruturado de uma bula de profissional de saúde
+    api_response = api_instance.v1_leaflet_resume_professional_post(medicationId)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling LeafletApi->v1LeafletResumeProfessionalPost: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">medicationId*</td>
+                                <td>
+                                
+                                
+                                    <div id="d2e199_v1LeafletResumeProfessionalPost_medicationId">
+                                        <div class="json-schema-view">
+                                            <div class="primitive">
+                                                <span class="type">
+                                                    String
+                                                </span>
+                                
+                                                    <div class="inner description">
+                                                        O código GGREM do medicamento
+                                                    </div>
+                                            </div>
+                                                <div class="inner required">
+                                                    Required
+                                                </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                </tr>
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - Resumo gerado ou recuperado com sucesso </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-v1LeafletResumeProfessionalPost-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-v1LeafletResumeProfessionalPost-200-schema">
+                                  <div id='responses-v1LeafletResumeProfessionalPost-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Resumo gerado ou recuperado com sucesso",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/ProfessionalLeafletResponseDTO"
+      }
+    }
+  }
+};
+                                        var schema = schemaWrapper.content["application/json"].schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.components = {};
+                                          schemaWrapper.components.schemas = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-v1LeafletResumeProfessionalPost-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-v1LeafletResumeProfessionalPost-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-v1LeafletResumeProfessionalPost-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 204 - Resumo indisponível (medicamento não encontrado ou sem bula PDF na base) </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                            <h3> Status: 400 - Falha na requisição (ex: medicationId não fornecido) </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-v1LeafletResumeProfessionalPost-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-v1LeafletResumeProfessionalPost-400-schema">
+                                  <div id='responses-v1LeafletResumeProfessionalPost-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Falha na requisição (ex: medicationId não fornecido)",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/ErrorResponseDTO"
+      }
+    }
+  }
+};
+                                        var schema = schemaWrapper.content["application/json"].schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.components = {};
+                                          schemaWrapper.components.schemas = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-v1LeafletResumeProfessionalPost-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-v1LeafletResumeProfessionalPost-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-v1LeafletResumeProfessionalPost-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 401 -  </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
                             </div>
 
                         </article>

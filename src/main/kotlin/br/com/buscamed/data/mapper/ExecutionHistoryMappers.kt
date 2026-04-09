@@ -15,7 +15,7 @@ fun LLMExecutionHistory.toDocument(): LLMExecutionHistoryDocument {
         success = success,
         startDate = startDate,
         endDate = endDate,
-        storageImagePath = storageImagePath,
+        storagePath = storagePath,
         prompt = prompt,
         clientProcessorVersion = clientProcessorVersion,
         llmModel = llmModel
@@ -33,7 +33,7 @@ fun LLMExecutionHistoryDocument.toDomain(): LLMExecutionHistory {
         success = success,
         startDate = startDate,
         endDate = endDate,
-        storageImagePath = storageImagePath,
+        storagePath = storagePath,
         prompt = prompt,
         clientProcessorVersion = clientProcessorVersion,
         llmModel = llmModel

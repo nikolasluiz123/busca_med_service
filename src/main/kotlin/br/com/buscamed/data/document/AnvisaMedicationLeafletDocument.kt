@@ -8,7 +8,7 @@ import java.time.Instant
 
 data class AnvisaMedicationLeafletDocument(
     @DocumentId
-    override val id: String,
+    override val id: String = "",
     val leafletStoragePath: String? = null,
     val leafletResume: String? = null,
     @Serializable(with = InstantSerializer::class)
